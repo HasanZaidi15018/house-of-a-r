@@ -1,50 +1,26 @@
-import React, {
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
-
+import React, { useMemo, useState } from "react";
 import { createRoot } from "react-dom/client";
 import { QRCodeCanvas } from "qrcode.react";
-
 import "./App.css";
 
 /* =========================================================
-   HOUSE OF A&R
-   MAIN WEBSITE
+   HOUSE OF A&R — WEBSITE CONFIG
    ========================================================= */
 
-const WHATSAPP_NUMBER = "9335743731";
+const WHATSAPP_NUMBER = "9125289227";
 
 /*
-  Used internally only for the UPI QR.
-  It is NOT displayed anywhere on the website.
+  Used only inside the UPI QR.
+  The UPI ID is intentionally NOT printed anywhere on the site.
 */
 const PAYMENT_VPA = "hasanzaidi7949-2@okhdfcbank";
 
-const DELIVERY_UNDER_7KM = 59;
-const DELIVERY_ABOVE_7KM = 99;
-
-/*
-  Pickup area supplied for the business.
-  This is used as the delivery origin.
-*/
-const PICKUP_QUERY =
-  "5/1/5/3, C-5/1, River Bank Colony, Kaiser Bagh, Lucknow, Uttar Pradesh 226018";
-
-/*
-  Approximate fallback for River Bank Colony / Kaiser Bagh.
-  Normally the app tries to geocode the pickup location first.
-*/
-const PICKUP_FALLBACK = {
-  lat: 26.8515,
-  lon: 80.9356,
-};
-
+const PRODUCT_PRICE = 399;
+const ORIGINAL_PRICE = 599;
+const DELIVERY_CHARGE = 59;
 
 /* =========================================================
-   PRODUCTS
+   CURRENT COLLECTION
    ========================================================= */
 
 const PRODUCTS = [
@@ -56,12 +32,10 @@ const PRODUCTS = [
     description:
       "A refined lavender fragrance with a graceful and sophisticated character.",
     image: "/products/lavendra-noir.png",
-    price: 399,
-    originalPrice: 599,
-    available: true,
+    price: PRODUCT_PRICE,
+    originalPrice: ORIGINAL_PRICE,
     accent: "lavender",
   },
-
   {
     id: 2,
     number: "02",
@@ -70,12 +44,10 @@ const PRODUCTS = [
     description:
       "A romantic floral fragrance created to leave a soft and memorable impression.",
     image: "/products/blush-noir.png",
-    price: 399,
-    originalPrice: 599,
-    available: true,
+    price: PRODUCT_PRICE,
+    originalPrice: ORIGINAL_PRICE,
     accent: "blush",
   },
-
   {
     id: 3,
     number: "03",
@@ -84,12 +56,10 @@ const PRODUCTS = [
     description:
       "A warm and elegant interpretation of timeless oudh with a refined character.",
     image: "/products/ivory-oudh.png",
-    price: 399,
-    originalPrice: 599,
-    available: true,
+    price: PRODUCT_PRICE,
+    originalPrice: ORIGINAL_PRICE,
     accent: "ivory",
   },
-
   {
     id: 4,
     number: "04",
@@ -98,12 +68,10 @@ const PRODUCTS = [
     description:
       "A deep and captivating fragrance with a warm, mysterious and confident character.",
     image: "/products/velvet-ember.png",
-    price: 399,
-    originalPrice: 599,
-    available: true,
+    price: PRODUCT_PRICE,
+    originalPrice: ORIGINAL_PRICE,
     accent: "ember",
   },
-
   {
     id: 5,
     number: "05",
@@ -112,12 +80,10 @@ const PRODUCTS = [
     description:
       "A fresh and sophisticated oud fragrance with an elegant aquatic character.",
     image: "/products/azure-oud.png",
-    price: 399,
-    originalPrice: 599,
-    available: true,
+    price: PRODUCT_PRICE,
+    originalPrice: ORIGINAL_PRICE,
     accent: "azure",
   },
-
   {
     id: 6,
     number: "06",
@@ -126,432 +92,147 @@ const PRODUCTS = [
     description:
       "A graceful floral fragrance designed around softness, elegance and charm.",
     image: "/products/velvet-bloom.png",
-    price: 399,
-    originalPrice: 599,
-    available: true,
+    price: PRODUCT_PRICE,
+    originalPrice: ORIGINAL_PRICE,
     accent: "bloom",
   },
-
   {
     id: 7,
     number: "07",
     name: "Legacy",
-    family: "Elegant · Deep · Timeless",
+    family: "Classic · Deep · Distinctive",
     description:
-      "A distinctive signature fragrance created to leave a lasting impression.",
+      "A composed fragrance built around depth, warmth and a timeless signature.",
     image: "/products/legacy.png",
-    price: 399,
-    originalPrice: 599,
-    available: true,
+    price: PRODUCT_PRICE,
+    originalPrice: ORIGINAL_PRICE,
     accent: "legacy",
   },
 ];
 
-
 /* =========================================================
-   ADDRESS SEARCH
+   FUTURE LAUNCH ADVERTISEMENT
+   These are teaser images only — not purchasable yet.
    ========================================================= */
 
-async function searchNominatim(query) {
-  const url =
-    "https://nominatim.openstreetmap.org/search?" +
-    new URLSearchParams({
-      q: query,
-      format: "jsonv2",
-      addressdetails: "1",
-      limit: "6",
-      countrycodes: "in",
-    });
+const FUTURE_LAUNCH = [
+  {
+    id: 1,
+    image: "/future-launch/launch-01.jpg",
+    kicker: "COMING SOON",
+    title: "Pillow Mist & Curtain Mist",
+    text: "A new way to refresh your everyday spaces.",
+  },
+  {
+    id: 2,
+    image: "/future-launch/launch-02.jpg",
+    kicker: "THE NEXT CHAPTER",
+    title: "Refresh Your Space",
+    text: "Designed for pillows, curtains and the atmosphere around you.",
+  },
+  {
+    id: 3,
+    image: "/future-launch/launch-03.jpg",
+    kicker: "HOUSE OF A&R",
+    title: "Something New Is Coming Home",
+    text: "Meet the next House of A&R home-fragrance experience soon.",
+  },
+];
 
-  const response = await fetch(url, {
-    headers: {
-      Accept: "application/json",
-    },
+/* =========================================================
+   HELPERS
+   ========================================================= */
+
+const formatCurrency = (value) =>
+  new Intl.NumberFormat("en-IN", {
+    style: "currency",
+    currency: "INR",
+    maximumFractionDigits: 0,
+  }).format(value);
+
+function scrollToSection(id) {
+  document.getElementById(id)?.scrollIntoView({
+    behavior: "smooth",
+    block: "start",
   });
-
-  if (!response.ok) {
-    throw new Error("Address search failed");
-  }
-
-  const data = await response.json();
-
-  return data
-    .filter((item) => {
-      const text =
-        item.display_name?.toLowerCase() || "";
-
-      return text.includes("lucknow");
-    })
-    .map((item) => ({
-      id: `n-${item.place_id}`,
-      display_name: item.display_name,
-      lat: Number(item.lat),
-      lon: Number(item.lon),
-    }));
 }
 
-
-async function searchPhoton(query) {
-  const url =
-    "https://photon.komoot.io/api/?" +
-    new URLSearchParams({
-      q: query,
-      limit: "6",
-    });
-
-  const response = await fetch(url);
-
-  if (!response.ok) {
-    throw new Error("Photon search failed");
-  }
-
-  const data = await response.json();
-
-  return (data.features || [])
-    .map((feature, index) => {
-      const properties =
-        feature.properties || {};
-
-      const coordinates =
-        feature.geometry?.coordinates || [];
-
-      const text = [
-        properties.name,
-        properties.street,
-        properties.district,
-        properties.city,
-        properties.state,
-        properties.postcode,
-      ]
-        .filter(Boolean)
-        .join(", ");
-
-      return {
-        id: `p-${index}-${coordinates.join("-")}`,
-        display_name: text,
-        lat: Number(coordinates[1]),
-        lon: Number(coordinates[0]),
-      };
-    })
-    .filter((item) =>
-      item.display_name
-        .toLowerCase()
-        .includes("lucknow")
-    );
-}
-
-
-function buildSearchQueries(address) {
-  const clean =
-    address
-      .replace(/\s+/g, " ")
-      .trim();
-
-  return [
-    `${clean}, Lucknow, Uttar Pradesh, India`,
-    `${clean}, Lucknow, India`,
-    `${clean}, Uttar Pradesh, India`,
-    clean,
-  ];
-}
-
-
-async function findAddress(address) {
-  const queries =
-    buildSearchQueries(address);
-
-  /* Nominatim */
-  for (const query of queries) {
-    try {
-      const results =
-        await searchNominatim(query);
-
-      if (results.length > 0) {
-        return results;
-      }
-    } catch {
-      // Continue.
-    }
-  }
-
-  /* Photon fallback */
-  for (const query of queries) {
-    try {
-      const results =
-        await searchPhoton(query);
-
-      if (results.length > 0) {
-        return results;
-      }
-    } catch {
-      // Continue.
-    }
-  }
-
-  return [];
-}
-
-
-/* =========================================================
-   REVERSE GEOCODING
-   ========================================================= */
-
-async function reverseGeocode(lat, lon) {
-  try {
-    const url =
-      "https://nominatim.openstreetmap.org/reverse?" +
-      new URLSearchParams({
-        lat,
-        lon,
-        format: "jsonv2",
-        zoom: "18",
-        addressdetails: "1",
-      });
-
-    const response = await fetch(url, {
-      headers: {
-        Accept: "application/json",
-      },
-    });
-
-    if (!response.ok) {
-      throw new Error("Reverse lookup failed");
-    }
-
-    const data =
-      await response.json();
-
-    return data.display_name || "";
-  } catch {
-    return "";
-  }
-}
-
-
-/* =========================================================
-   PICKUP LOCATION
-   ========================================================= */
-
-async function geocodePickup() {
-  const queries = [
-    PICKUP_QUERY,
-    "River Bank Colony, Kaiser Bagh, Lucknow",
-    "River Bank Colony, Lucknow, Uttar Pradesh",
-    "Kaiser Bagh, Lucknow, Uttar Pradesh",
-  ];
-
-  for (const query of queries) {
-    try {
-      const results =
-        await searchNominatim(query);
-
-      if (results.length > 0) {
-        return {
-          lat: results[0].lat,
-          lon: results[0].lon,
-        };
-      }
-    } catch {
-      // Continue.
-    }
-  }
-
-  return PICKUP_FALLBACK;
-}
-
-
-/* =========================================================
-   DRIVING DISTANCE
-   ========================================================= */
-
-async function calculateDrivingDistance(
-  destination,
-  pickupRef
-) {
-  if (
-    !destination ||
-    !Number.isFinite(destination.lat) ||
-    !Number.isFinite(destination.lon)
-  ) {
-    throw new Error(
-      "Invalid destination."
-    );
-  }
-
-  if (!pickupRef.current) {
-    pickupRef.current =
-      await geocodePickup();
-  }
-
-  const pickup =
-    pickupRef.current;
-
-  const routeUrl =
-    "https://router.project-osrm.org/route/v1/driving/" +
-    `${pickup.lon},${pickup.lat};` +
-    `${destination.lon},${destination.lat}` +
-    "?overview=false";
-
-  const response =
-    await fetch(routeUrl);
-
-  if (!response.ok) {
-    throw new Error(
-      "Route calculation failed."
-    );
-  }
-
-  const data =
-    await response.json();
-
-  if (
-    data.code !== "Ok" ||
-    !data.routes ||
-    data.routes.length === 0
-  ) {
-    throw new Error(
-      "No driving route found."
-    );
-  }
-
-  return (
-    data.routes[0].distance / 1000
-  );
-}
-
-
-/* =========================================================
-   UPI QR
-   ========================================================= */
-
-function createUPILink(amount, orderText) {
+function createPaymentQR(total, orderNumber) {
   const params = new URLSearchParams({
     pa: PAYMENT_VPA,
     pn: "House Of A&R",
-    am: Number(amount).toFixed(2),
+    am: Number(total).toFixed(2),
     cu: "INR",
-    tn: orderText,
+    tn: `House Of A&R ${orderNumber}`,
   });
 
   return `upi://pay?${params.toString()}`;
 }
 
-
 /* =========================================================
-   MAIN APP
+   APP
    ========================================================= */
 
 function App() {
   const [cart, setCart] = useState([]);
+  const [cartOpen, setCartOpen] = useState(false);
 
-  const [cartOpen, setCartOpen] =
-    useState(false);
+  const [checkout, setCheckout] = useState({
+    name: "",
+    phone: "",
+    address: "",
+  });
 
-  const [checkout, setCheckout] =
-    useState({
-      name: "",
-      phone: "",
-      address: "",
-    });
+  const [paymentConfirmed, setPaymentConfirmed] = useState(false);
+  const [orderSent, setOrderSent] = useState(false);
 
-  const [suggestions, setSuggestions] =
-    useState([]);
+  const cartCount = useMemo(
+    () => cart.reduce((sum, item) => sum + item.quantity, 0),
+    [cart]
+  );
 
-  const [searching, setSearching] =
-    useState(false);
+  const subtotal = useMemo(
+    () =>
+      cart.reduce(
+        (sum, item) => sum + item.price * item.quantity,
+        0
+      ),
+    [cart]
+  );
 
-  const [distanceLoading, setDistanceLoading] =
-    useState(false);
+  const total = subtotal + (cart.length ? DELIVERY_CHARGE : 0);
 
-  const [distanceKm, setDistanceKm] =
-    useState(null);
+  const orderNumber = useMemo(
+    () => `A&R-${Date.now().toString().slice(-6)}`,
+    [cartOpen]
+  );
 
-  const [deliveryCharge, setDeliveryCharge] =
-    useState(null);
+  const upiLink = createPaymentQR(
+    total || PRODUCT_PRICE,
+    orderNumber
+  );
 
-  const [selectedLocation, setSelectedLocation] =
-    useState(null);
-
-  const [locationStatus, setLocationStatus] =
-    useState("");
-
-  const [locationError, setLocationError] =
-    useState("");
-
-  const pickupRef =
-    useRef(null);
-
-  const searchTimer =
-    useRef(null);
-
-
-  /* =======================================================
-     LIGHT THEME CHANGES ON EACH PAGE LOAD
-     ======================================================= */
-
-  useEffect(() => {
-    const themes = [
-      "theme-cream",
-      "theme-lavender",
-      "theme-rose",
-      "theme-blue",
-      "theme-peach",
-      "theme-sage",
-    ];
-
-    const saved =
-      localStorage.getItem(
-        "house-ar-theme"
-      );
-
-    let nextTheme;
-
-    if (saved) {
-      const currentIndex =
-        themes.indexOf(saved);
-
-      nextTheme =
-        themes[
-          (currentIndex + 1) %
-            themes.length
-        ];
-    } else {
-      nextTheme = themes[0];
-    }
-
-    localStorage.setItem(
-      "house-ar-theme",
-      nextTheme
-    );
-
-    document.body.className =
-      nextTheme;
-
-    return () => {
-      document.body.className = "";
-    };
-  }, []);
-
-
-  /* =======================================================
-     CART
-     ======================================================= */
+  function updateCheckout(field, value) {
+    setCheckout((current) => ({
+      ...current,
+      [field]: value,
+    }));
+    setPaymentConfirmed(false);
+    setOrderSent(false);
+  }
 
   function addToCart(product) {
     setCart((current) => {
-      const existing =
-        current.find(
-          (item) =>
-            item.id === product.id
-        );
+      const existing = current.find(
+        (item) => item.id === product.id
+      );
 
       if (existing) {
         return current.map((item) =>
           item.id === product.id
             ? {
                 ...item,
-                quantity:
-                  item.quantity + 1,
+                quantity: item.quantity + 1,
               }
             : item
         );
@@ -567,743 +248,287 @@ function App() {
     });
 
     setCartOpen(true);
+    setPaymentConfirmed(false);
+    setOrderSent(false);
   }
 
-
-  function changeQuantity(
-    productId,
-    amount
-  ) {
+  function changeQuantity(productId, amount) {
     setCart((current) =>
       current
         .map((item) =>
           item.id === productId
             ? {
                 ...item,
-                quantity:
-                  item.quantity + amount,
+                quantity: item.quantity + amount,
               }
             : item
         )
-        .filter(
-          (item) =>
-            item.quantity > 0
-        )
+        .filter((item) => item.quantity > 0)
     );
+    setPaymentConfirmed(false);
+    setOrderSent(false);
   }
-
 
   function removeFromCart(productId) {
     setCart((current) =>
-      current.filter(
-        (item) =>
-          item.id !== productId
-      )
+      current.filter((item) => item.id !== productId)
     );
+    setPaymentConfirmed(false);
+    setOrderSent(false);
   }
 
-
-  const cartCount = useMemo(
-    () =>
-      cart.reduce(
-        (sum, item) =>
-          sum + item.quantity,
-        0
-      ),
-    [cart]
-  );
-
-
-  const subtotal = useMemo(
-    () =>
-      cart.reduce(
-        (sum, item) =>
-          sum +
-          item.price *
-            item.quantity,
-        0
-      ),
-    [cart]
-  );
-
-
-  const total =
-    subtotal +
-    (deliveryCharge || 0);
-
-
-  /* =======================================================
-     CHECKOUT INPUT
-     ======================================================= */
-
-  function updateCheckout(
-    field,
-    value
-  ) {
-    setCheckout((current) => ({
-      ...current,
-      [field]: value,
-    }));
-
-    if (field === "address") {
-      setSelectedLocation(null);
-      setDistanceKm(null);
-      setDeliveryCharge(null);
-      setLocationStatus("");
-      setLocationError("");
-    }
+  function closeCart() {
+    setCartOpen(false);
   }
 
+  function validateCheckout() {
+    const phone = checkout.phone.replace(/\D/g, "");
 
-  /* =======================================================
-     ADDRESS SUGGESTIONS
-     ======================================================= */
-
-  useEffect(() => {
-    const query =
-      checkout.address.trim();
-
-    if (
-      query.length < 3 ||
-      selectedLocation
-    ) {
-      setSuggestions([]);
-      return;
+    if (!cart.length) {
+      alert("Your cart is empty.");
+      return false;
     }
 
-    if (searchTimer.current) {
-      clearTimeout(
-        searchTimer.current
+    if (!checkout.name.trim()) {
+      alert("Please enter your full name.");
+      return false;
+    }
+
+    if (phone.length !== 10) {
+      alert("Please enter a valid 10-digit mobile number.");
+      return false;
+    }
+
+    if (!checkout.address.trim()) {
+      alert("Please enter your complete delivery address.");
+      return false;
+    }
+
+    if (!paymentConfirmed) {
+      alert(
+        "Please complete the QR payment and then tap 'Payment completed'."
       );
+      return false;
     }
 
-    searchTimer.current =
-      setTimeout(async () => {
-        try {
-          setSearching(true);
-
-          const results =
-            await findAddress(query);
-
-          setSuggestions(
-            results.slice(0, 6)
-          );
-        } catch {
-          setSuggestions([]);
-        } finally {
-          setSearching(false);
-        }
-      }, 700);
-
-    return () => {
-      if (searchTimer.current) {
-        clearTimeout(
-          searchTimer.current
-        );
-      }
-    };
-  }, [
-    checkout.address,
-    selectedLocation,
-  ]);
-
-
-  /* =======================================================
-     SELECT ADDRESS
-     ======================================================= */
-
-  async function selectSuggestion(
-    suggestion
-  ) {
-    const destination = {
-      lat: Number(
-        suggestion.lat
-      ),
-      lon: Number(
-        suggestion.lon
-      ),
-    };
-
-    setSuggestions([]);
-
-    setSelectedLocation(
-      destination
-    );
-
-    setCheckout((current) => ({
-      ...current,
-      address:
-        suggestion.display_name,
-    }));
-
-    await calculateLocation(
-      destination,
-      suggestion.display_name
-    );
+    return true;
   }
-
-
-  /* =======================================================
-     CALCULATE LOCATION
-     ======================================================= */
-
-  async function calculateLocation(
-    destination,
-    displayAddress = ""
-  ) {
-    setDistanceLoading(true);
-    setLocationError("");
-
-    setLocationStatus(
-      "Calculating driving distance..."
-    );
-
-    try {
-      const km =
-        await calculateDrivingDistance(
-          destination,
-          pickupRef
-        );
-
-      const charge =
-        km <= 7
-          ? DELIVERY_UNDER_7KM
-          : DELIVERY_ABOVE_7KM;
-
-      setDistanceKm(km);
-      setDeliveryCharge(charge);
-
-      if (displayAddress) {
-        setCheckout((current) => ({
-          ...current,
-          address:
-            displayAddress,
-        }));
-      }
-
-      setLocationStatus(
-        `✓ Location confirmed · ${km.toFixed(
-          1
-        )} km driving distance`
-      );
-    } catch {
-      setDistanceKm(null);
-      setDeliveryCharge(null);
-
-      setLocationError(
-        "We found the location, but the driving route could not be calculated. Please try again."
-      );
-
-      setLocationStatus("");
-    } finally {
-      setDistanceLoading(false);
-    }
-  }
-
-
-  /* =======================================================
-     FIND ADDRESS BUTTON
-     ======================================================= */
-
-  async function findAndCalculateAddress() {
-    const address =
-      checkout.address.trim();
-
-    if (address.length < 5) {
-      setLocationError(
-        "Please enter your delivery address."
-      );
-
-      return;
-    }
-
-    setLocationError("");
-    setDistanceLoading(true);
-    setSuggestions([]);
-
-    setLocationStatus(
-      "Finding your address..."
-    );
-
-    try {
-      const results =
-        await findAddress(address);
-
-      if (!results.length) {
-        throw new Error(
-          "Address not found"
-        );
-      }
-
-      const result =
-        results[0];
-
-      const destination = {
-        lat: Number(result.lat),
-        lon: Number(result.lon),
-      };
-
-      setSelectedLocation(
-        destination
-      );
-
-      setCheckout((current) => ({
-        ...current,
-        address:
-          result.display_name,
-      }));
-
-      await calculateLocation(
-        destination,
-        result.display_name
-      );
-    } catch {
-      setDistanceKm(null);
-      setDeliveryCharge(null);
-      setSelectedLocation(null);
-
-      setLocationStatus("");
-
-      setLocationError(
-        "We couldn't find this address. Please select an address from the suggestions or use your current location."
-      );
-    } finally {
-      setDistanceLoading(false);
-    }
-  }
-
-
-  /* =======================================================
-     CURRENT GPS LOCATION
-     ======================================================= */
-
-  function useCurrentLocation() {
-    setLocationError("");
-    setLocationStatus(
-      "Requesting your current location..."
-    );
-
-    if (!navigator.geolocation) {
-      setLocationError(
-        "Location services are not supported by this browser."
-      );
-
-      return;
-    }
-
-    navigator.geolocation.getCurrentPosition(
-      async (position) => {
-        try {
-          const lat =
-            position.coords.latitude;
-
-          const lon =
-            position.coords.longitude;
-
-          const destination = {
-            lat,
-            lon,
-          };
-
-          setSelectedLocation(
-            destination
-          );
-
-          setLocationStatus(
-            "Location found · identifying your address..."
-          );
-
-          const address =
-            await reverseGeocode(
-              lat,
-              lon
-            );
-
-          if (
-            !address
-              .toLowerCase()
-              .includes("lucknow")
-          ) {
-            setSelectedLocation(
-              null
-            );
-
-            throw new Error(
-              "Outside Lucknow"
-            );
-          }
-
-          setCheckout((current) => ({
-            ...current,
-            address,
-          }));
-
-          await calculateLocation(
-            destination,
-            address
-          );
-        } catch {
-          setDistanceKm(null);
-          setDeliveryCharge(null);
-          setSelectedLocation(null);
-
-          setLocationError(
-            "We could not confirm a Lucknow delivery location. Please search your address manually."
-          );
-
-          setLocationStatus("");
-        }
-      },
-
-      (error) => {
-        let message =
-          "Unable to get your current location.";
-
-        if (
-          error.code ===
-          error.PERMISSION_DENIED
-        ) {
-          message =
-            "Location permission was denied. Please allow location access and try again.";
-        }
-
-        if (
-          error.code ===
-          error.POSITION_UNAVAILABLE
-        ) {
-          message =
-            "Your device could not determine its location. Please search your address instead.";
-        }
-
-        if (
-          error.code ===
-          error.TIMEOUT
-        ) {
-          message =
-            "Location request timed out. Please try again.";
-        }
-
-        setLocationError(message);
-        setLocationStatus("");
-      },
-
-      {
-        enableHighAccuracy: true,
-        timeout: 15000,
-        maximumAge: 30000,
-      }
-    );
-  }
-
-
-  /* =======================================================
-     PAYMENT
-     ======================================================= */
-
-  const orderNumber =
-    `A&R-${Date.now()
-      .toString()
-      .slice(-6)}`;
-
-  const upiLink =
-    createUPILink(
-      total,
-      `House Of A&R Order ${orderNumber}`
-    );
-
 
   function sendWhatsAppOrder() {
-    if (!checkout.name.trim()) {
-      alert(
-        "Please enter your name."
-      );
+    if (!validateCheckout()) return;
 
-      return;
-    }
-
-    if (
-      checkout.phone.replace(
-        /\D/g,
-        ""
-      ).length < 10
-    ) {
-      alert(
-        "Please enter a valid mobile number."
-      );
-
-      return;
-    }
-
-    if (
-      !checkout.address.trim()
-    ) {
-      alert(
-        "Please enter your delivery address."
-      );
-
-      return;
-    }
-
-    if (
-      !selectedLocation ||
-      deliveryCharge === null
-    ) {
-      alert(
-        "Please confirm your delivery location first."
-      );
-
-      return;
-    }
-
-    const productText =
-      cart
-        .map(
-          (item) =>
-            `${item.name} × ${item.quantity} = ₹${
-              item.price *
-              item.quantity
-            }`
-        )
-        .join("\n");
+    const orderItems = cart
+      .map(
+        (item) =>
+          `• ${item.name} × ${item.quantity} — ${formatCurrency(
+            item.price * item.quantity
+          )}`
+      )
+      .join("\n");
 
     const message = [
       "HOUSE OF A&R — NEW ORDER",
       "",
-      `Customer: ${checkout.name}`,
-      `Phone: ${checkout.phone}`,
+      "━━━━━━━━━━━━━━━━━━━━",
       "",
-      "Products:",
-      productText,
+      "CUSTOMER",
+      `Name: ${checkout.name.trim()}`,
+      `Mobile: ${checkout.phone}`,
       "",
-      `Products Total: ₹${subtotal}`,
-      `Driving Distance: ${distanceKm.toFixed(
-        1
-      )} km`,
-      `Delivery: ₹${deliveryCharge}`,
-      `Order Total: ₹${total}`,
+      "DELIVERY ADDRESS",
+      checkout.address.trim(),
       "",
-      "Delivery Address:",
-      checkout.address,
+      "━━━━━━━━━━━━━━━━━━━━",
       "",
-      "Payment: UPI QR",
+      "ORDER",
+      orderItems,
       "",
-      "Customer has completed the order from the website.",
+      `Products: ${formatCurrency(subtotal)}`,
+      `Delivery: ${formatCurrency(DELIVERY_CHARGE)}`,
+      `TOTAL: ${formatCurrency(total)}`,
+      "",
+      "PAYMENT STATUS",
+      "✓ Customer confirms payment completed via QR.",
+      "",
+      "━━━━━━━━━━━━━━━━━━━━",
+      "",
+      "Please confirm the order.",
+      "",
+      "Thank you.",
+      "House of A&R",
+      "Same-day delivery in Lucknow.",
     ].join("\n");
 
     const url =
-      `https://wa.me/91${WHATSAPP_NUMBER}?text=${encodeURIComponent(
-        message
-      )}`;
+      `https://wa.me/91${WHATSAPP_NUMBER}` +
+      `?text=${encodeURIComponent(message)}`;
 
-    window.open(
-      url,
-      "_blank"
-    );
+    setOrderSent(true);
+    window.open(url, "_blank", "noopener,noreferrer");
   }
-
-
-  /* =======================================================
-     NAVIGATION
-     ======================================================= */
-
-  function goTo(id) {
-    const element =
-      document.getElementById(id);
-
-    if (element) {
-      element.scrollIntoView({
-        behavior: "smooth",
-        block: "start",
-      });
-    }
-  }
-
-
-  /* =======================================================
-     RENDER
-     ======================================================= */
 
   return (
     <div className="site-shell">
 
-      {/* ===================================================
-          TOP BAR
-          =================================================== */}
+      {/* =================================================
+          ANNOUNCEMENT
+          ================================================= */}
 
       <div className="top-bar">
         <span>HOUSE OF A&amp;R</span>
-        <span className="top-dot">•</span>
+        <i>•</i>
         <span>NOW DELIVERING IN LUCKNOW</span>
-        <span className="top-dot">•</span>
-        <span>LAUNCH SALE · 30 ML ₹399</span>
+        <i>•</i>
+        <span>30 ML · LAUNCH OFFER · ₹399</span>
       </div>
 
-
-      {/* ===================================================
+      {/* =================================================
           HEADER
-          =================================================== */}
+          ================================================= */}
 
       <header className="site-header">
-
-        <button
-          className="brand"
-          onClick={() =>
-            goTo("home")
-          }
-          aria-label="House of A&R home"
-        >
-          <img
-            src="/logo.jpeg"
-            alt="House of A&R"
-          />
-        </button>
-
-
-        <nav className="desktop-nav">
+        <div className="header-inner">
 
           <button
-            onClick={() =>
-              goTo("home")
-            }
+            className="header-brand"
+            onClick={() => scrollToSection("home")}
+            aria-label="Go to House of A&R home"
           >
-            HOME
+            <img
+              src="/logo.jpeg"
+              alt="House of A&R"
+            />
           </button>
 
-          <button
-            onClick={() =>
-              goTo("collection")
-            }
-          >
-            COLLECTION
-          </button>
+          <nav className="desktop-nav" aria-label="Primary navigation">
+            <button onClick={() => scrollToSection("home")}>
+              HOME
+            </button>
+            <button onClick={() => scrollToSection("collection")}>
+              COLLECTION
+            </button>
+            <button onClick={() => scrollToSection("future")}>
+              THE NEXT CHAPTER
+            </button>
+            <button onClick={() => scrollToSection("story")}>
+              OUR STORY
+            </button>
+            <button onClick={() => scrollToSection("contact")}>
+              CONTACT
+            </button>
+          </nav>
 
-          <button
-            onClick={() =>
-              goTo("story")
-            }
-          >
-            OUR STORY
-          </button>
+          <div className="header-actions">
+            <button
+              className="cart-button"
+              onClick={() => setCartOpen(true)}
+            >
+              CART
+              {cartCount > 0 && (
+                <span className="cart-count">
+                  {cartCount}
+                </span>
+              )}
+            </button>
 
-          <button
-            onClick={() =>
-              goTo("contact")
-            }
-          >
-            CONTACT
-          </button>
-
-        </nav>
-
-
-        <div className="header-actions">
-
-          <button
-            className="cart-button"
-            onClick={() =>
-              setCartOpen(true)
-            }
-          >
-            <span>🛒</span>
-            CART
-
-            {cartCount > 0 && (
-              <strong className="cart-count">
-                {cartCount}
-              </strong>
-            )}
-          </button>
-
-          <button
-            className="explore-button"
-            onClick={() =>
-              goTo("collection")
-            }
-          >
-            EXPLORE
-          </button>
+            <button
+              className="shop-button"
+              onClick={() => scrollToSection("collection")}
+            >
+              SHOP NOW
+            </button>
+          </div>
 
         </div>
-
       </header>
-
-
-      {/* ===================================================
-          DELIVERY NOTICE
-          =================================================== */}
-
-      <div className="delivery-notice">
-
-        <span className="notice-label">
-          DELIVERY AREA
-        </span>
-
-        <span>
-          Currently available in
-          Lucknow only
-        </span>
-
-      </div>
-
-
-      {/* ===================================================
-          HERO
-          =================================================== */}
 
       <main>
 
-        <section
-          id="home"
-          className="hero-section"
-        >
+        {/* =================================================
+            HERO
+            ================================================= */}
+
+        <section id="home" className="hero-section">
 
           <div className="hero-content">
 
-            <p className="eyebrow">
-              HOUSE OF A&amp;R · FINE FRAGRANCES
-            </p>
+            <div className="hero-copy">
 
-            <h1>
-              Leave a
-              <em> lasting </em>
-              impression.
-            </h1>
+              <p className="eyebrow">
+                HOUSE OF A&amp;R · FINE FRAGRANCES
+              </p>
 
-            <p className="hero-description">
-              Discover thoughtfully
-              crafted fragrances
-              designed to become
-              part of your signature.
-            </p>
+              <h1>
+                Find your
+                <br />
+                <em>signature.</em>
+              </h1>
 
-            <button
-              className="primary-button"
-              onClick={() =>
-                goTo("collection")
-              }
-            >
-              EXPLORE COLLECTION
-              <span>→</span>
-            </button>
+              <p className="hero-subtitle">
+                Fine fragrances, made to be remembered.
+              </p>
 
-          </div>
+              <p className="hero-description">
+                Discover refined fragrances created for
+                different moods, moments and personalities.
+              </p>
 
+              <button
+                className="primary-button"
+                onClick={() => scrollToSection("collection")}
+              >
+                EXPLORE THE COLLECTION
+                <span>→</span>
+              </button>
 
-          <div className="hero-visual">
+              <div className="hero-stats">
+                <div>
+                  <strong>₹399</strong>
+                  <span>30 ML LAUNCH PRICE</span>
+                </div>
 
-            <div className="hero-glow" />
+                <div>
+                  <strong>30 ML</strong>
+                  <span>FINE FRAGRANCE</span>
+                </div>
 
-            <div className="logo-orbit">
-              <img
-                src="/logo.jpeg"
-                alt="House of A&R Fine Fragrances"
-              />
+                <div>
+                  <strong>₹59</strong>
+                  <span>LUCKNOW DELIVERY</span>
+                </div>
+              </div>
+
+            </div>
+
+            {/* Refined, centered logo presentation */}
+            <div className="hero-visual">
+
+              <div className="hero-orbit orbit-one" />
+              <div className="hero-orbit orbit-two" />
+
+              <div className="hero-logo-halo">
+
+                <div className="hero-logo-circle">
+
+                  <img
+                    src="/logo.jpeg"
+                    alt="House of A&R Fine Fragrances"
+                  />
+
+                </div>
+
+                <div className="hero-logo-label">
+                  <span>THE HOUSE OF</span>
+                  <strong>FINE FRAGRANCES</strong>
+                </div>
+
+              </div>
+
             </div>
 
           </div>
 
         </section>
-
 
         {/* =================================================
             COLLECTION
@@ -1323,159 +548,236 @@ function App() {
 
               <h2>
                 Discover your
-                <em> signature.</em>
+                <br />
+                <em>signature.</em>
               </h2>
             </div>
 
-            <p className="section-intro">
-              Seven distinct
-              fragrances. One
-              signature house.
+            <p>
+              Refined fragrances for different moods, moments
+              and personalities. Every bottle is 30 ml.
             </p>
 
           </div>
 
-
           <div className="collection-grid">
 
-            {PRODUCTS.map(
-              (product) => (
-                <article
-                  className={`product-card ${product.accent}`}
-                  key={product.id}
-                >
+            {PRODUCTS.map((product) => (
 
-                  <div className="product-image-wrap">
+              <article
+                className={`product-card ${product.accent}`}
+                key={product.id}
+              >
 
-                    <img
-                      src={product.image}
-                      alt={product.name}
-                      className="product-image"
-                      loading={
-                        product.id <= 3
-                          ? "eager"
-                          : "lazy"
-                      }
-                    />
+                <div className="product-image-wrap">
 
-                  </div>
+                  <img
+                    src={product.image}
+                    alt={product.name}
+                    className="product-image"
+                    loading={product.id <= 3 ? "eager" : "lazy"}
+                  />
 
+                  <span className="product-badge">
+                    30 ML
+                  </span>
 
-                  <div className="product-info">
+                </div>
 
+                <div className="product-info">
+
+                  {product.number !== "07" && (
                     <span className="product-number">
                       {product.number}
                     </span>
+                  )}
 
-                    <h3>
-                      {product.name}
-                    </h3>
+                  <h3>
+                    {product.name}
+                  </h3>
 
-                    <p className="product-family">
-                      {product.family}
-                    </p>
+                  <p className="product-family">
+                    {product.family}
+                  </p>
 
-                    <p className="product-description">
-                      {product.description}
-                    </p>
+                  <p className="product-description">
+                    {product.description}
+                  </p>
 
+                  <div className="product-bottom">
 
-                    <div className="product-bottom">
+                    <div className="price-area">
+
+                      <small>
+                        LAUNCH OFFER
+                      </small>
 
                       <div>
+                        <del>
+                          ₹{product.originalPrice}
+                        </del>
 
-                        <span className="sale-label">
-                          30 ML · LAUNCH SALE
-                        </span>
-
-                        <div className="price-row">
-
-                          <del>
-                            ₹599
-                          </del>
-
-                          <strong>
-                            ₹399
-                          </strong>
-
-                        </div>
-
+                        <strong>
+                          ₹{product.price}
+                        </strong>
                       </div>
-
-
-                      <button
-                        className="add-button"
-                        onClick={() =>
-                          addToCart(
-                            product
-                          )
-                        }
-                      >
-                        ADD TO CART →
-                      </button>
 
                     </div>
 
+                    <button
+                      className="add-button"
+                      onClick={() => addToCart(product)}
+                    >
+                      ADD TO CART
+                      <span>→</span>
+                    </button>
+
                   </div>
 
-                </article>
-              )
-            )}
+                </div>
+
+              </article>
+
+            ))}
 
           </div>
 
-
-          <div className="sizes-banner">
-
+          <div className="collection-note">
             <div>
-              <strong>
-                30 ML
-              </strong>
-              <span>
-                AVAILABLE NOW
-              </span>
+              <strong>30 ML</strong>
+              <span>AVAILABLE NOW</span>
             </div>
 
             <div>
-              <strong>
-                15 ML
-              </strong>
-              <span>
-                COMING SOON
-              </span>
+              <strong>₹399</strong>
+              <span>LAUNCH PRICE</span>
             </div>
 
             <div>
-              <strong>
-                50 ML
-              </strong>
-              <span>
-                COMING SOON
-              </span>
+              <strong>₹59</strong>
+              <span>LUCKNOW DELIVERY</span>
+            </div>
+          </div>
+
+        </section>
+
+        {/* =================================================
+            FUTURE LAUNCH — MOVING ADVERTISEMENT
+            ================================================= */}
+
+        <section
+          id="future"
+          className="future-section"
+        >
+
+          <div className="future-heading">
+
+            <div>
+              <p className="eyebrow">
+                THE NEXT CHAPTER
+              </p>
+
+              <h2>
+                Something new
+                <br />
+                <em>is coming home.</em>
+              </h2>
+            </div>
+
+            <p>
+              A first look at what House of A&amp;R is preparing
+              next. These preview pieces are not available for
+              purchase yet.
+            </p>
+
+          </div>
+
+          <div className="future-marquee">
+
+            <div className="future-track">
+
+              {[...FUTURE_LAUNCH, ...FUTURE_LAUNCH].map(
+                (item, index) => (
+
+                  <article
+                    className="future-ad-card"
+                    key={`${item.id}-${index}`}
+                  >
+
+                    <div className="future-ad-image">
+
+                      <img
+                        src={item.image}
+                        alt={item.title}
+                        draggable="false"
+                      />
+
+                      <span className="future-ad-badge">
+                        {item.kicker}
+                      </span>
+
+                      <div className="future-ad-overlay">
+                        <span>HOUSE OF A&amp;R</span>
+                        <strong>{item.title}</strong>
+                        <small>{item.text}</small>
+                      </div>
+
+                    </div>
+
+                  </article>
+
+                )
+              )}
+
+            </div>
+
+          </div>
+
+          <div className="future-launch-strip">
+
+            <div>
+              <span>COMING SOON</span>
+              <strong>Pillow Mist</strong>
+            </div>
+
+            <div className="future-strip-dot">•</div>
+
+            <div>
+              <span>COMING SOON</span>
+              <strong>Curtain Mist</strong>
+            </div>
+
+            <div className="future-strip-dot">•</div>
+
+            <div>
+              <span>HOUSE OF A&amp;R</span>
+              <strong>A new way to refresh your space.</strong>
             </div>
 
           </div>
 
         </section>
 
-
         {/* =================================================
             STORY
             ================================================= */}
 
-        <section
-          id="story"
-          className="story-section"
-        >
+        <section id="story" className="story-section">
 
-          <div className="story-image">
-            <img
-              src="/logo.jpeg"
-              alt="House of A&R"
-            />
+          <div className="story-logo">
+
+            <div className="story-logo-frame">
+
+              <img
+                src="/logo.jpeg"
+                alt="House of A&R"
+              />
+
+            </div>
+
           </div>
 
-          <div className="story-content">
+          <div className="story-copy">
 
             <p className="eyebrow">
               OUR STORY
@@ -1483,68 +785,95 @@ function App() {
 
             <h2>
               Fragrance,
-              <em> beautifully personal.</em>
+              <br />
+              <em>beautifully personal.</em>
             </h2>
 
             <p>
-              House of A&amp;R was created
-              around a simple idea:
-              fragrance should feel
-              personal, memorable and
+              House of A&amp;R was created around a simple idea:
+              fragrance should feel personal, memorable and
               effortlessly elegant.
             </p>
 
             <p>
-              Each fragrance in our
-              collection has its own
-              character, mood and story —
-              created for different
-              moments and different
+              Each fragrance has its own character, mood and
+              story — created for different moments and different
               signatures.
             </p>
 
             <div className="story-signature">
               HOUSE OF A&amp;R
-              <span>
-                FINE FRAGRANCES
-              </span>
+              <span>FINE FRAGRANCES · LUCKNOW</span>
             </div>
 
           </div>
 
         </section>
 
+        {/* =================================================
+            ORDER EXPERIENCE
+            ================================================= */}
+
+        <section className="experience-section">
+
+          <div>
+            <span>01</span>
+            <strong>Choose your scent</strong>
+            <p>
+              Explore the collection and add your favourites to cart.
+            </p>
+          </div>
+
+          <div>
+            <span>02</span>
+            <strong>Scan &amp; pay</strong>
+            <p>
+              Complete your payment using the secure QR shown at checkout.
+            </p>
+          </div>
+
+          <div>
+            <span>03</span>
+            <strong>WhatsApp confirmation</strong>
+            <p>
+              Send the prepared order details directly to House of A&amp;R.
+            </p>
+          </div>
+
+          <div>
+            <span>04</span>
+            <strong>Same-day delivery</strong>
+            <p>
+              Orders are prepared for same-day delivery in Lucknow after confirmation.
+            </p>
+          </div>
+
+        </section>
 
         {/* =================================================
             CONTACT
             ================================================= */}
 
-        <section
-          id="contact"
-          className="contact-section"
-        >
+        <section id="contact" className="contact-section">
 
           <div>
 
             <p className="eyebrow">
-              CONTACT
+              CONTACT HOUSE OF A&amp;R
             </p>
 
             <h2>
               Need help choosing
-              <em> your fragrance?</em>
+              <br />
+              <em>your fragrance?</em>
             </h2>
 
             <p>
-              We currently deliver
-              across Lucknow.
-              Message us directly
-              for fragrance guidance
-              or order assistance.
+              Message us directly for fragrance guidance,
+              order assistance or upcoming launch updates.
             </p>
 
           </div>
-
 
           <a
             className="whatsapp-button"
@@ -1560,27 +889,23 @@ function App() {
 
       </main>
 
-
-      {/* ===================================================
-          CART OVERLAY
-          =================================================== */}
+      {/* =================================================
+          CART
+          ================================================= */}
 
       {cartOpen && (
+
         <div
-          className="cart-overlay"
-          onClick={() =>
-            setCartOpen(false)
-          }
+          className="modal-overlay"
+          onClick={closeCart}
         >
 
           <aside
-            className="cart-drawer"
-            onClick={(event) =>
-              event.stopPropagation()
-            }
+            className="cart-panel"
+            onClick={(event) => event.stopPropagation()}
           >
 
-            <div className="cart-header">
+            <div className="panel-header">
 
               <div>
                 <p className="eyebrow">
@@ -1588,44 +913,37 @@ function App() {
                 </p>
 
                 <h2>
-                  Cart
+                  Your Cart
                 </h2>
               </div>
 
               <button
                 className="close-button"
-                onClick={() =>
-                  setCartOpen(false)
-                }
+                onClick={closeCart}
+                aria-label="Close cart"
               >
                 ×
               </button>
 
             </div>
 
-
-            {cart.length === 0 ? (
+            {!cart.length ? (
 
               <div className="empty-cart">
-
-                <span>
-                  ✦
-                </span>
 
                 <h3>
                   Your cart is empty.
                 </h3>
 
                 <p>
-                  Discover a fragrance
-                  and make it yours.
+                  Discover a fragrance and make it yours.
                 </p>
 
                 <button
                   className="primary-button"
                   onClick={() => {
-                    setCartOpen(false);
-                    goTo("collection");
+                    closeCart();
+                    scrollToSection("collection");
                   }}
                 >
                   EXPLORE COLLECTION
@@ -1637,94 +955,91 @@ function App() {
 
               <div className="cart-content">
 
-                {/* CART ITEMS */}
+                <div className="cart-products">
 
-                <div className="cart-items">
+                  {cart.map((item) => (
 
-                  {cart.map(
-                    (item) => (
-                      <div
-                        className="cart-item"
-                        key={item.id}
-                      >
+                    <div
+                      className="cart-product"
+                      key={item.id}
+                    >
 
+                      <div className="cart-image">
                         <img
                           src={item.image}
                           alt={item.name}
                         />
+                      </div>
 
-                        <div className="cart-item-info">
+                      <div className="cart-product-details">
+
+                        <span className="cart-number">
+                          {item.number}
+                        </span>
+
+                        <h3>
+                          {item.name}
+                        </h3>
+
+                        <p>
+                          30 ML · {formatCurrency(item.price)}
+                        </p>
+
+                        <div className="quantity-control">
+
+                          <button
+                            onClick={() =>
+                              changeQuantity(item.id, -1)
+                            }
+                            aria-label="Decrease quantity"
+                          >
+                            −
+                          </button>
 
                           <span>
-                            30 ML
+                            {item.quantity}
                           </span>
 
-                          <h3>
-                            {item.name}
-                          </h3>
-
-                          <strong>
-                            ₹{item.price}
-                          </strong>
-
-
-                          <div className="quantity-row">
-
-                            <button
-                              onClick={() =>
-                                changeQuantity(
-                                  item.id,
-                                  -1
-                                )
-                              }
-                            >
-                              −
-                            </button>
-
-                            <span>
-                              {item.quantity}
-                            </span>
-
-                            <button
-                              onClick={() =>
-                                changeQuantity(
-                                  item.id,
-                                  1
-                                )
-                              }
-                            >
-                              +
-                            </button>
-
-                            <button
-                              className="remove-button"
-                              onClick={() =>
-                                removeFromCart(
-                                  item.id
-                                )
-                              }
-                            >
-                              REMOVE
-                            </button>
-
-                          </div>
+                          <button
+                            onClick={() =>
+                              changeQuantity(item.id, 1)
+                            }
+                            aria-label="Increase quantity"
+                          >
+                            +
+                          </button>
 
                         </div>
 
+                        <button
+                          className="remove-button"
+                          onClick={() =>
+                            removeFromCart(item.id)
+                          }
+                        >
+                          REMOVE
+                        </button>
+
                       </div>
-                    )
-                  )}
+
+                      <strong className="cart-item-total">
+                        {formatCurrency(
+                          item.price * item.quantity
+                        )}
+                      </strong>
+
+                    </div>
+
+                  ))}
 
                 </div>
-
-
-                {/* CHECKOUT */}
 
                 <div className="checkout-section">
 
                   <div className="checkout-title">
+
                     <span className="eyebrow">
-                      DELIVERY DETAILS
+                      CHECKOUT
                     </span>
 
                     <h2>
@@ -1732,322 +1047,173 @@ function App() {
                     </h2>
 
                     <p>
-                      Delivery is currently
-                      available in Lucknow only.
+                      Delivery is currently available in Lucknow only.
                     </p>
+
                   </div>
-
-
-                  {/* NAME */}
 
                   <label>
                     FULL NAME
-
                     <input
                       type="text"
-                      value={
-                        checkout.name
-                      }
+                      value={checkout.name}
                       onChange={(event) =>
                         updateCheckout(
                           "name",
                           event.target.value
                         )
                       }
-                      placeholder="Your full name"
+                      placeholder="Enter your full name"
                       autoComplete="name"
                     />
-
                   </label>
-
-
-                  {/* PHONE */}
 
                   <label>
                     MOBILE NUMBER
-
                     <input
                       type="tel"
-                      value={
-                        checkout.phone
-                      }
+                      value={checkout.phone}
                       onChange={(event) =>
                         updateCheckout(
                           "phone",
                           event.target.value
+                            .replace(/\D/g, "")
+                            .slice(0, 10)
                         )
                       }
                       placeholder="10-digit mobile number"
                       autoComplete="tel"
-                      inputMode="tel"
+                      inputMode="numeric"
                     />
-
                   </label>
 
-
-                  {/* LOCATION */}
-
-                  <div className="location-box">
-
-                    <p className="eyebrow">
-                      DELIVERY LOCATION
-                    </p>
-
-                    <h3>
-                      Where should we
-                      deliver?
-                    </h3>
-
-
-                    <button
-                      className="location-button"
-                      onClick={
-                        useCurrentLocation
+                  <label>
+                    COMPLETE DELIVERY ADDRESS
+                    <textarea
+                      value={checkout.address}
+                      onChange={(event) =>
+                        updateCheckout(
+                          "address",
+                          event.target.value
+                        )
                       }
-                    >
-                      📍 USE MY CURRENT LOCATION
-                    </button>
+                      placeholder="House / Flat, Street, Colony, Landmark, Lucknow, PIN code"
+                      autoComplete="street-address"
+                    />
+                  </label>
 
-
-                    <div className="or-divider">
-                      <span>
-                        OR SEARCH ADDRESS
-                      </span>
+                  <div className="manual-address-note">
+                    <span>✓</span>
+                    <div>
+                      <strong>Enter your address manually</strong>
+                      <small>
+                        No Google Maps account or paid Maps service is required.
+                      </small>
                     </div>
-
-
-                    <div className="address-search">
-
-                      <textarea
-                        value={
-                          checkout.address
-                        }
-                        onChange={(event) =>
-                          updateCheckout(
-                            "address",
-                            event.target.value
-                          )
-                        }
-                        placeholder="Start typing your delivery address..."
-                        rows="3"
-                        autoComplete="street-address"
-                      />
-
-
-                      {searching && (
-                        <div className="search-status">
-                          Searching Lucknow
-                          addresses...
-                        </div>
-                      )}
-
-
-                      {suggestions.length >
-                        0 && (
-                        <div className="suggestions">
-
-                          {suggestions.map(
-                            (
-                              suggestion
-                            ) => (
-                              <button
-                                key={
-                                  suggestion.id
-                                }
-                                onClick={() =>
-                                  selectSuggestion(
-                                    suggestion
-                                  )
-                                }
-                              >
-                                <span>
-                                  📍
-                                </span>
-
-                                <span>
-                                  {
-                                    suggestion.display_name
-                                  }
-                                </span>
-                              </button>
-                            )
-                          )}
-
-                        </div>
-                      )}
-
-                    </div>
-
-
-                    <button
-                      className="calculate-button"
-                      onClick={
-                        findAndCalculateAddress
-                      }
-                      disabled={
-                        distanceLoading
-                      }
-                    >
-                      {distanceLoading
-                        ? "CALCULATING..."
-                        : "CONFIRM ADDRESS & CALCULATE DELIVERY"}
-                    </button>
-
-
-                    {locationStatus && (
-                      <div className="location-success">
-                        {locationStatus}
-                      </div>
-                    )}
-
-
-                    {locationError && (
-                      <div className="location-error">
-                        {locationError}
-                      </div>
-                    )}
-
-
-                    {distanceKm !== null &&
-                      deliveryCharge !==
-                        null && (
-                        <div className="delivery-result">
-
-                          <div>
-                            <span>
-                              DRIVING DISTANCE
-                            </span>
-
-                            <strong>
-                              {distanceKm.toFixed(
-                                1
-                              )}{" "}
-                              km
-                            </strong>
-                          </div>
-
-                          <div>
-                            <span>
-                              DELIVERY CHARGE
-                            </span>
-
-                            <strong>
-                              ₹
-                              {
-                                deliveryCharge
-                              }
-                            </strong>
-                          </div>
-
-                        </div>
-                      )}
-
                   </div>
-
-
-                  {/* ORDER SUMMARY */}
 
                   <div className="order-summary">
 
                     <div>
-                      <span>
-                        Products
-                      </span>
-
-                      <strong>
-                        ₹{subtotal}
-                      </strong>
+                      <span>Products</span>
+                      <strong>{formatCurrency(subtotal)}</strong>
                     </div>
-
 
                     <div>
-                      <span>
-                        Delivery
-                      </span>
-
-                      <strong>
-                        {deliveryCharge !==
-                        null
-                          ? `₹${deliveryCharge}`
-                          : "—"}
-                      </strong>
+                      <span>Lucknow delivery</span>
+                      <strong>{formatCurrency(DELIVERY_CHARGE)}</strong>
                     </div>
 
-
                     <div className="summary-total">
-
-                      <span>
-                        TOTAL
-                      </span>
-
-                      <strong>
-                        ₹{total}
-                      </strong>
-
+                      <span>TOTAL</span>
+                      <strong>{formatCurrency(total)}</strong>
                     </div>
 
                   </div>
 
-
-                  {/* PAYMENT */}
-
                   <div className="payment-section">
 
                     <p className="eyebrow">
-                      SECURE UPI PAYMENT
+                      SIMPLE QR PAYMENT
                     </p>
 
                     <h2>
                       Scan &amp; Pay
                     </h2>
 
-                    <p>
-                      Scan the QR code using
-                      Google Pay, PhonePe,
-                      Paytm or another UPI
-                      app.
+                    <p className="payment-description">
+                      Scan this QR code using Google Pay,
+                      PhonePe, Paytm or another UPI app.
                     </p>
-
 
                     <div className="qr-wrapper">
-
                       <QRCodeCanvas
                         value={upiLink}
-                        size={220}
+                        size={235}
                         level="H"
-                        includeMargin={true}
+                        includeMargin
                       />
-
                     </div>
 
-
-                    <div className="payment-note">
-                      PAYMENT AMOUNT
-                      <strong>
-                        ₹{total}
-                      </strong>
+                    <div className="payment-amount">
+                      <span>AMOUNT TO PAY</span>
+                      <strong>{formatCurrency(total)}</strong>
                     </div>
-
 
                     <button
-                      className="whatsapp-order-button"
-                      onClick={
-                        sendWhatsAppOrder
+                      className={
+                        paymentConfirmed
+                          ? "payment-confirmed"
+                          : "payment-confirm-button"
+                      }
+                      onClick={() =>
+                        setPaymentConfirmed(true)
                       }
                     >
-                      I HAVE COMPLETED PAYMENT
-                      <span>→</span>
+                      {paymentConfirmed
+                        ? "✓ PAYMENT COMPLETED"
+                        : "I HAVE COMPLETED PAYMENT"}
                     </button>
 
+                    {paymentConfirmed && (
+                      <div className="payment-success">
+                        <strong>
+                          Payment marked as completed.
+                        </strong>
 
-                    <p className="payment-small">
-                      After completing payment,
-                      tap the button above to
-                      send your order details
-                      on WhatsApp.
-                    </p>
+                        <span>
+                          Your order details are ready to send to House of A&amp;R.
+                        </span>
+                      </div>
+                    )}
 
                   </div>
+
+                  <button
+                    className="whatsapp-order-button"
+                    onClick={sendWhatsAppOrder}
+                  >
+                    SEND ORDER ON WHATSAPP
+                    <span>→</span>
+                  </button>
+
+                  {orderSent && (
+                    <div className="order-sent">
+                      <strong>
+                        Order details prepared.
+                      </strong>
+
+                      <span>
+                        WhatsApp has been opened with your order information.
+                      </span>
+                    </div>
+                  )}
+
+                  <p className="checkout-note">
+                    After payment, tap “I Have Completed Payment”
+                    and then send your order on WhatsApp.
+                    Same-day delivery in Lucknow.
+                  </p>
 
                 </div>
 
@@ -2059,14 +1225,13 @@ function App() {
         </div>
       )}
 
-
-      {/* ===================================================
+      {/* =================================================
           FOOTER
-          =================================================== */}
+          ================================================= */}
 
       <footer className="site-footer">
 
-        <div>
+        <div className="footer-brand">
 
           <img
             src="/logo.jpeg"
@@ -2081,34 +1246,18 @@ function App() {
 
         </div>
 
-
         <div>
-          <span>
-            CURRENTLY DELIVERING IN
-          </span>
-
-          <strong>
-            LUCKNOW ONLY
-          </strong>
+          <span>DELIVERY</span>
+          <strong>LUCKNOW ONLY</strong>
         </div>
 
-
         <div>
-          <span>
-            WHATSAPP
-          </span>
-
-          <strong>
-            +91 {WHATSAPP_NUMBER}
-          </strong>
+          <span>ORDER SUPPORT</span>
+          <strong>WHATSAPP</strong>
         </div>
-
 
         <div className="copyright">
-          © {new Date().getFullYear()}
-          {" "}
-          House of A&amp;R.
-          All rights reserved.
+          © {new Date().getFullYear()} House of A&amp;R · Fine Fragrances · Lucknow
         </div>
 
       </footer>
@@ -2116,11 +1265,6 @@ function App() {
     </div>
   );
 }
-
-
-/* =========================================================
-   START REACT
-   ========================================================= */
 
 createRoot(
   document.getElementById("root")
