@@ -89,6 +89,7 @@ function App() {
   
   const [cartItems, setCartItems] = useState([]);
   const [isCartOpen, setIsCartOpen] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [toastMessage, setToastMessage] = useState("");
   const [isCheckoutView, setIsCheckoutView] = useState(false);
   const [isOrderComplete, setIsOrderComplete] = useState(false);
@@ -216,8 +217,10 @@ const addToCart = (product) => {
                 phone: checkoutData.phone,
                 address: checkoutData.address,
                 pincode: checkoutData.pincode,
-                amount: cartTotal,
-                orderId: response.razorpay_order_id
+                amount: cartTotal, 
+                orderId: response.razorpay_order_id,     // Explicitly grabs Razorpay's Order ID
+                paymentId: response.razorpay_payment_id, // Required for your backend signature check
+                signature: response.razorpay_signature   // Required for your backend signature check
               }),
             });
           } catch (err) {
@@ -297,7 +300,7 @@ const addToCart = (product) => {
               <BagIcon />
               {cartCount > 0 && <span className="icon-badge">{cartCount}</span>}
             </button>
-            <button className="mobile-menu-button" aria-label="Open menu">
+<button className="mobile-menu-button" aria-label="Open menu" onClick={() => setIsMobileMenuOpen(true)}>
               <MenuIcon />
             </button>
           </div>
@@ -336,7 +339,20 @@ const addToCart = (product) => {
           </div>
         )}
       </header>
-
+       {/* MOBILE MENU DRAWER */}
+        <div className={`mobile-menu-overlay ${isMobileMenuOpen ? "open" : ""}`}>
+          <div className="mobile-menu-header">
+            <img src="/images/logo.png" alt="House of A&R" style={{ height: "30px" }} />
+            <button className="mobile-menu-close" onClick={() => setIsMobileMenuOpen(false)}>✕</button>
+          </div>
+          <nav className="mobile-nav-links">
+            <Link to="/" onClick={() => setIsMobileMenuOpen(false)}>HOME</Link>
+            <Link to="/shop" onClick={() => setIsMobileMenuOpen(false)}>SHOP ALL</Link>
+            <Link to="/shop" onClick={() => setIsMobileMenuOpen(false)}>PERFUMES</Link>
+            <Link to="/gifting" onClick={() => setIsMobileMenuOpen(false)}>GIFTING</Link>
+            <Link to="/story" onClick={() => setIsMobileMenuOpen(false)}>OUR STORY</Link>
+          </nav>
+        </div>
       <main>
         <Routes>
           <Route path="/" element={<HomePage {...pageProps} />} />
@@ -597,18 +613,22 @@ function HomePage({ products, toggleWishlist, wishlist, addToCart, openProduct }
         </div>
       </section>
 
-      <section className="families-section">
-        <div className="section-label">MADE TO BECOME PART OF YOUR EVERYDAY</div>
-        <h2>A fragrance for<em> every mood.</em></h2>
-        <div className="family-grid">
-          {[{ name: "Woody", image: "/images/woody.jpg" }, { name: "Woody Floral", image: "/images/aquatic.jpg" }, { name: "Floral", image: "/images/floral.jpg" }].map((family) => (
-            <div className="family-card" key={family.name}>
-              <img src={family.image} alt={family.name} />
-              <div className="family-overlay"><span>EXPLORE</span><h3>{family.name}</h3><span className="family-arrow">→</span></div>
-            </div>
-          ))}
+<section className="families-section">
+  <div className="section-label">MADE TO BECOME PART OF YOUR EVERYDAY</div>
+  <h2>A fragrance for<em> every mood.</em></h2>
+  <div className="family-grid">
+    {[{ name: "Woody", image: "/images/woody.jpg" }, { name: "Woody Floral", image: "/images/aquatic.jpg" }, { name: "Floral", image: "/images/floral.jpg" }].map((family) => (
+      <Link to="/shop" className="family-card" key={family.name}>
+        <img src={family.image} alt={family.name} />
+        <div className="family-overlay">
+          <span>EXPLORE</span>
+          <h3>{family.name}</h3>
+          <span className="family-arrow">→</span>
         </div>
-      </section>
+      </Link>
+    ))}
+  </div>
+</section>
     </div>
   );
 }
