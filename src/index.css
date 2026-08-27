@@ -2176,7 +2176,7 @@ img {
 }
 
 .search-results-grid {
-  max-width: 800px;
+  max-width:1000px;
   margin: 0 auto;
   width: 100%;
   display: grid;
@@ -2243,4 +2243,18 @@ img {
 .out-of-stock-btn:hover {
   background: #e0e0e0 !important;
   color: #888888 !important;
+}
+
+.search-results-grid .product-image-wrapper,
+.product-image-wrapper {
+  aspect-ratio: auto !important;
+  height: 300px !important; /* Adjust if needed */
+  background-color: transparent !important;
+}
+
+.search-results-grid .product-image,
+.product-image {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: contain !important; /* Forces the entire image to stay visible */
 }
