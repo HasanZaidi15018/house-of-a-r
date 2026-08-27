@@ -183,7 +183,7 @@ function App() {
     }
 
     try {
-      const orderResponse = await fetch("http://localhost:5000/create-order", {
+      const orderResponse = await fetch("https://house-of-ar-backend.onrender.com/create-order", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ amount: cartTotal }), 
@@ -197,10 +197,10 @@ function App() {
         name: "House of A&R",
         description: "Fine Fragrances Purchase",
         image: "/images/logo.png",
-        order_id: orderData.id, 
+        order_id: orderData.id,   
         handler: async function (response) {
           try {
-            await fetch("http://localhost:5000/confirm-order", {
+            await fetch("https://house-of-ar-backend.onrender.com/confirm-order", {
               method: "POST",
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify({
