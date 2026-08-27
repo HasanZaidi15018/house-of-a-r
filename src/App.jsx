@@ -89,6 +89,7 @@ function App() {
   
   const [cartItems, setCartItems] = useState([]);
   const [isCartOpen, setIsCartOpen] = useState(false);
+  const [toastMessage, setToastMessage] = useState("");
   const [isCheckoutView, setIsCheckoutView] = useState(false);
   const [isOrderComplete, setIsOrderComplete] = useState(false);
   
@@ -126,7 +127,7 @@ function App() {
     localStorage.setItem("houseOfARWishlist", JSON.stringify(wishlist));
   }, [wishlist]);
 
-  const addToCart = (product) => {
+const addToCart = (product) => {
     setCartItems((prevItems) => {
       const existingItem = prevItems.find((item) => item.id === product.id);
       if (existingItem) {
@@ -136,9 +137,15 @@ function App() {
       }
       return [...prevItems, { ...product, quantity: 1 }];
     });
-    setIsCartOpen(true);
-    setIsCheckoutView(false);
-    setIsOrderComplete(false);
+    
+    // Close the product window
+    setSelectedProduct(null);
+    
+    // Trigger the animated popup
+    setToastMessage(`${product.name} added to your cart.`);
+    setTimeout(() => {
+      setToastMessage("");
+    }, 3000);
   };
 
   const updateCartQuantity = (id, change) => {
@@ -191,7 +198,7 @@ function App() {
       const orderData = await orderResponse.json();
 
       const options = {
-        key: "rzp_test_YOUR_KEY_HERE",
+        key: "rzp_test_TUPIQk9hGbZzJA",
         amount: orderData.amount, 
         currency: orderData.currency,
         name: "House of A&R",
@@ -531,6 +538,11 @@ function App() {
             )}
           </div>
         )}
+      </div>
+
+      {/* ANIMATED TOAST NOTIFICATION */}
+      <div className={`toast-notification ${toastMessage ? "show" : ""}`}>
+        ✓ {toastMessage}
       </div>
 
     </div>
