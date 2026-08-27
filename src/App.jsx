@@ -283,7 +283,7 @@ const addToCart = (product) => {
                 PERFUMES <span className="chevron">⌄</span>
               </button>
             </div>
-            <Link to="/" className="nav-link" onClick={closeMenus}>HOME FRAGRANCES</Link>
+            <a href="/#home-fragrances" className="nav-link" onClick={closeMenus}>HOME FRAGRANCES</a>
             <Link to="/gifting" className="nav-link" onClick={closeMenus}>GIFTING</Link>
             <Link to="/story" className="nav-link" onClick={closeMenus}>OUR STORY</Link>
           </nav>
@@ -349,6 +349,7 @@ const addToCart = (product) => {
             <Link to="/" onClick={() => setIsMobileMenuOpen(false)}>HOME</Link>
             <Link to="/shop" onClick={() => setIsMobileMenuOpen(false)}>SHOP ALL</Link>
             <Link to="/shop" onClick={() => setIsMobileMenuOpen(false)}>PERFUMES</Link>
+            <a href="/#home-fragrances" onClick={() => setIsMobileMenuOpen(false)}>HOME FRAGRANCES</a>
             <Link to="/gifting" onClick={() => setIsMobileMenuOpen(false)}>GIFTING</Link>
             <Link to="/story" onClick={() => setIsMobileMenuOpen(false)}>OUR STORY</Link>
           </nav>
@@ -604,7 +605,7 @@ function HomePage({ products, toggleWishlist, wishlist, addToCart, openProduct }
         </div>
       </section>
 
-      <section className="mist-section">
+      <section id="home-fragrances" className="mist-section">
         <div className="mist-image"><img src="/images/home-mist.jpg" alt="Pillow Mist and Curtain Mist" /></div>
         <div className="mist-content">
           <div className="section-label light-label">THE NEXT CHAPTER</div>
