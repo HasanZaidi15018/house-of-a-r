@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Routes, Route, Link, useNavigate, useLocation } from "react-router-dom";
 import "./index.css";
+import AuthModal from './AuthModal';
 
 const products = [
   {
@@ -99,6 +100,25 @@ function App() {
   });
   
   const [selectedProduct, setSelectedProduct] = useState(null);
+  const [isAuthOpen, setIsAuthOpen] = useState(false);
+const [loggedInUser, setLoggedInUser] = useState(JSON.parse(localStorage.getItem("user")) || null);
+
+// AUTO-FILL CHECKOUT WHEN LOGGED IN
+  useEffect(() => {
+    if (loggedInUser) {
+      setCheckoutData(prevData => ({
+        ...prevData,
+        name: loggedInUser.name || "",
+        email: loggedInUser.email || ""
+      }));
+    } else {
+      setCheckoutData(prevData => ({
+        ...prevData,
+        name: "",
+        email: ""
+      }));
+    }
+  }, [loggedInUser]);
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -298,6 +318,25 @@ const addToCart = (product) => {
           </nav>
 
           <div className="header-actions">
+{loggedInUser ? (
+  <button 
+    onClick={() => {
+      localStorage.removeItem("token");
+      localStorage.removeItem("user");
+      setLoggedInUser(null);
+    }}
+    style={{ background: "none", border: "none", color: "#000", cursor: "pointer", fontSize: "13px", fontWeight: "500", letterSpacing: "1px", textTransform: "uppercase", fontFamily: "inherit", whiteSpace: "nowrap" }}
+  >
+    LOGOUT ({loggedInUser.name.split(" ")[0]})
+  </button>
+) : (
+  <button 
+    onClick={() => setIsAuthOpen(true)}
+    style={{ background: "none", border: "none", color: "#000", cursor: "pointer", fontSize: "13px", fontWeight: "500", letterSpacing: "1px", textTransform: "uppercase", fontFamily: "inherit", whiteSpace: "nowrap" }}
+  >
+    LOGIN
+  </button>
+)}
             <button className="icon-button" aria-label="Search" onClick={() => setIsSearchOpen(true)}>
               <SearchIcon />
             </button>
@@ -417,6 +456,11 @@ const addToCart = (product) => {
           <span>© 2026 House of A&amp;R</span><span>FINE FRAGRANCES</span>
         </div>
       </footer>
+      <AuthModal 
+  isOpen={isAuthOpen} 
+  onClose={() => setIsAuthOpen(false)} 
+  setLoggedInUser={setLoggedInUser} 
+/>
 
       {/* SEARCH OVERLAY */}
       <div className={`search-overlay ${isSearchOpen ? "open" : ""}`}>
