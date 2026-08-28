@@ -199,7 +199,7 @@ const addToCart = (product) => {
       const orderData = await orderResponse.json();
 
       const options = {
-        key: "rzp_test_TUPIQk9hGbZzJA",
+        key: "rzp_live_TV8GkbN95RSm9F",
         amount: orderData.amount, 
         currency: orderData.currency,
         name: "House of A&R",

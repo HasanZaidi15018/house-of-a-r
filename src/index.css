@@ -1482,7 +1482,7 @@ img {
 .wishlist-empty-icon svg { width:22px; height:22px; fill:none; stroke:var(--navy); stroke-width:1.2; }
 .wishlist-empty h3 { margin:18px 0 0; color:var(--navy); font-family:"Playfair Display",serif; font-size:clamp(30px,4vw,46px); line-height:1.08; font-weight:400; }
 .wishlist-empty p { margin-top:16px; color:#777; font-size:13px; }
-.wishlist-shop-button { margin-top:26px; min-height:52px; padding:0 24px; background:var(--navy); color:white; font-size:9px; font-weight:600; letter-spacing:1.6px; }
+.wishlist-shop-button { margin-top:26px; min-height:52px; padding:0 24px; background:var(--navy); color:white; font-size:9px; font-weight:600; letter-spacing:1.6px; display: inline-flex; align-items: center;justify-content: center;}
 .wishlist-shop-button:hover { background:var(--gold); }
 .wishlist-shop-button span { margin-left:25px; }
 
