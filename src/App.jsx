@@ -342,7 +342,7 @@ const addToCart = (product) => {
        {/* MOBILE MENU DRAWER */}
         <div className={`mobile-menu-overlay ${isMobileMenuOpen ? "open" : ""}`}>
           <div className="mobile-menu-header">
-            <img src="/images/logo.png" alt="House of A&R" style={{ height: "30px" }} />
+            <img src="/images/logo.png" alt="House of A&R" style={{ height: "40px", width: "auto", objectFit: "contain" }} />
             <button className="mobile-menu-close" onClick={() => setIsMobileMenuOpen(false)}>✕</button>
           </div>
           <nav className="mobile-nav-links">
