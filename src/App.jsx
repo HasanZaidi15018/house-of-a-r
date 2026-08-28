@@ -205,7 +205,16 @@ const addToCart = (product) => {
         name: "House of A&R",
         description: "Fine Fragrances Purchase",
         image: "/images/logo.png",
-        order_id: orderData.id,   
+        order_id: orderData.id,  
+        
+          notes: {
+          order_details: cart.map(item => `${item.quantity}x ${item.name}`).join(", "),
+          customer_name: "Customer Name", // Replace with your actual state variable
+          phone: "Customer Phone",       // Replace with your actual state variable
+          address: "Customer Address",   // Replace with your actual state variable
+          pincode: "Customer Pincode"    // Replace with your actual state variable
+        },
+
         handler: async function (response) {
           try {
             await fetch("https://house-of-ar-backend.onrender.com/confirm-order", {
