@@ -320,11 +320,13 @@ const addToCart = (product) => {
           <div className="header-actions">
 {loggedInUser ? (
   <button 
-    onClick={() => {
-      localStorage.removeItem("token");
-      localStorage.removeItem("user");
-      setLoggedInUser(null);
-    }}
+onClick={() => {
+  localStorage.removeItem("token");
+  localStorage.removeItem("user");
+  setLoggedInUser(null);
+  setWishlist([]);
+  setCartItems([]);
+}}
     style={{ background: "none", border: "none", color: "#000", cursor: "pointer", fontSize: "13px", fontWeight: "500", letterSpacing: "1px", textTransform: "uppercase", fontFamily: "inherit", whiteSpace: "nowrap" }}
   >
     LOGOUT ({loggedInUser.name.split(" ")[0]})
