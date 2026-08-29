@@ -88,7 +88,12 @@ function App() {
     } catch { return []; }
   });
   
-  const [cartItems, setCartItems] = useState([]);
+  const [cartItems, setCartItems] = useState(() => {
+    try {
+      const saved = localStorage.getItem("houseOfARCart");
+      return saved ? JSON.parse(saved) : [];
+    } catch { return []; }
+  });
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [toastMessage, setToastMessage] = useState("");
@@ -117,13 +122,6 @@ const [loggedInUser, setLoggedInUser] = useState(JSON.parse(localStorage.getItem
         name: "",
         email: ""
       }));
-    }
-  }, [loggedInUser]);
-// AUTO-RESTORE WISHLIST & CART ON LOGIN
-  useEffect(() => {
-    if (loggedInUser) {
-      if (loggedInUser.wishlist) setWishlist(loggedInUser.wishlist);
-      if (loggedInUser.cart) setCartItems(loggedInUser.cart);
     }
   }, [loggedInUser]);
 
@@ -176,6 +174,9 @@ const toggleWishlist = (id) => {
   useEffect(() => {
     localStorage.setItem("houseOfARWishlist", JSON.stringify(wishlist));
   }, [wishlist]);
+  useEffect(() => {
+    localStorage.setItem("houseOfARCart", JSON.stringify(cartItems));
+  }, [cartItems]);
 
 const syncCartToCloud = (updatedCart) => {
     if (loggedInUser) {
