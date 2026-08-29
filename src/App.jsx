@@ -474,7 +474,7 @@ onClick={() => {
           <Route path="/faq" element={<FAQPage />} />
           <Route path="/privacy" element={<PrivacyPage />} />
           <Route path="/terms" element={<TermsPage />} />
-          <Route path="/admin" element={<AdminPage />} />
+          <Route path="/admin" element={<AdminPage loggedInUser={loggedInUser} />} />
         </Routes>
       </main>
 
@@ -1032,6 +1032,16 @@ function TermsPage() {
 function AdminPage() {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
+
+  // SECURITY CHECK: Instantly block non-admins
+  if (!loggedInUser || loggedInUser.email !== "hasanzaidi7949@gmail.com") {
+    return (
+      <div className="page-transition" style={legalContainerStyle}>
+        <h2 style={legalHeadingStyle}>Access Denied</h2>
+        <p style={legalTextStyle}>You do not have authorization to view this secure dashboard.</p>
+      </div>
+    );
+  }
 
   useEffect(() => {
     fetch("https://house-of-ar-backend.onrender.com/api/orders")
