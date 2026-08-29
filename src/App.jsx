@@ -126,7 +126,7 @@ const [loggedInUser, setLoggedInUser] = useState(JSON.parse(localStorage.getItem
       }));
     }
   }, [loggedInUser]);
-  
+
 // REFRESH CART WHEN LOGIN STATE CHANGES
   useEffect(() => {
     const storageKey = loggedInUser ? `cart_${loggedInUser.email}` : "houseOfARCart_guest";
@@ -305,7 +305,8 @@ const syncCartToCloud = (updatedCart) => {
                 amount: cartTotal, 
                 orderId: response.razorpay_order_id,     // Explicitly grabs Razorpay's Order ID
                 paymentId: response.razorpay_payment_id, // Required for your backend signature check
-                signature: response.razorpay_signature   // Required for your backend signature check
+                signature: response.razorpay_signature,   // Required for your backend signature check
+                cartItems: cartItems
               }),
             });
           } catch (err) {
