@@ -119,10 +119,11 @@ const [loggedInUser, setLoggedInUser] = useState(JSON.parse(localStorage.getItem
       }));
     }
   }, [loggedInUser]);
-// AUTO-RESTORE WISHLIST ON LOGIN
+// AUTO-RESTORE WISHLIST & CART ON LOGIN
   useEffect(() => {
-    if (loggedInUser && loggedInUser.wishlist) {
-      setWishlist(loggedInUser.wishlist);
+    if (loggedInUser) {
+      if (loggedInUser.wishlist) setWishlist(loggedInUser.wishlist);
+      if (loggedInUser.cart) setCartItems(loggedInUser.cart);
     }
   }, [loggedInUser]);
 
