@@ -88,9 +88,11 @@ function App() {
     } catch { return []; }
   });
   
-  const [cartItems, setCartItems] = useState(() => {
+const [cartItems, setCartItems] = useState(() => {
     try {
-      const saved = localStorage.getItem("houseOfARCart");
+      const savedUser = JSON.parse(localStorage.getItem("user"));
+      const storageKey = savedUser ? `cart_${savedUser.email}` : "houseOfARCart_guest";
+      const saved = localStorage.getItem(storageKey);
       return saved ? JSON.parse(saved) : [];
     } catch { return []; }
   });
@@ -174,9 +176,10 @@ const toggleWishlist = (id) => {
   useEffect(() => {
     localStorage.setItem("houseOfARWishlist", JSON.stringify(wishlist));
   }, [wishlist]);
-  useEffect(() => {
-    localStorage.setItem("houseOfARCart", JSON.stringify(cartItems));
-  }, [cartItems]);
+useEffect(() => {
+    const storageKey = loggedInUser ? `cart_${loggedInUser.email}` : "houseOfARCart_guest";
+    localStorage.setItem(storageKey, JSON.stringify(cartItems));
+  }, [cartItems, loggedInUser]);
 
 const syncCartToCloud = (updatedCart) => {
     if (loggedInUser) {
