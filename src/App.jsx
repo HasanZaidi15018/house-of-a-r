@@ -119,6 +119,12 @@ const [loggedInUser, setLoggedInUser] = useState(JSON.parse(localStorage.getItem
       }));
     }
   }, [loggedInUser]);
+// AUTO-RESTORE WISHLIST ON LOGIN
+  useEffect(() => {
+    if (loggedInUser && loggedInUser.wishlist) {
+      setWishlist(loggedInUser.wishlist);
+    }
+  }, [loggedInUser]);
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -135,14 +141,36 @@ const [loggedInUser, setLoggedInUser] = useState(JSON.parse(localStorage.getItem
     }
   }, [isCartOpen, selectedProduct, isSearchOpen]);
 
-  const toggleWishlist = (id) => {
-    setWishlist((current) =>
-      current.includes(id) ? current.filter((item) => item !== id) : [...current, id]
-    );
+const toggleWishlist = (id) => {
+    setWishlist((current) => {
+      const newWishlist = current.includes(id) ? current.filter((item) => item !== id) : [...current, id];
+      
+      // Safely sync to cloud ONLY when a user explicitly clicks a heart
+      if (loggedInUser) {
+        fetch("https://house-of-ar-backend.onrender.com/api/wishlist", { 
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email: loggedInUser.email, wishlist: newWishlist })
+        }).catch(err => console.error("Cloud sync failed:", err));
+      }
+      
+      return newWishlist;
+    });
   };
 
   const removeFromWishlist = (id) => setWishlist((current) => current.filter((item) => item !== id));
-  const clearWishlist = () => setWishlist([]);
+  
+  const clearWishlist = () => {
+    setWishlist([]);
+    // Sync the cleared list to the database
+    if (loggedInUser) {
+        fetch("https://house-of-ar-backend.onrender.com/api/wishlist", { 
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email: loggedInUser.email, wishlist: [] })
+        });
+    }
+  };
 
   useEffect(() => {
     localStorage.setItem("houseOfARWishlist", JSON.stringify(wishlist));
@@ -461,7 +489,8 @@ onClick={() => {
       <AuthModal 
   isOpen={isAuthOpen} 
   onClose={() => setIsAuthOpen(false)} 
-  setLoggedInUser={setLoggedInUser} 
+  setLoggedInUser={setLoggedInUser}
+  setWishlist={setWishlist} 
 />
 
       {/* SEARCH OVERLAY */}
