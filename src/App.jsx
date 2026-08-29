@@ -474,7 +474,7 @@ onClick={() => {
           <Route path="/faq" element={<FAQPage />} />
           <Route path="/privacy" element={<PrivacyPage />} />
           <Route path="/terms" element={<TermsPage />} />
-          <Route path="/admin" element={<AdminPage loggedInUser={user} />} />
+          <Route path="/admin" element={<AdminPage />} />
         </Routes>
       </main>
 
@@ -1033,9 +1033,10 @@ function AdminPage() {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
 
-// Grab user from local storage
-  const loggedInUser = JSON.parse(localStorage.getItem("user"));
-  
+  // Safely grab user from local storage
+  const savedUser = localStorage.getItem("user");
+  const loggedInUser = savedUser ? JSON.parse(savedUser) : null;
+
   // SECURITY CHECK: Instantly block non-admins
   if (!loggedInUser || loggedInUser.email !== "hasanzaidi7949@gmail.com") {
     return (
