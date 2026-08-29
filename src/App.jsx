@@ -474,6 +474,7 @@ onClick={() => {
           <Route path="/faq" element={<FAQPage />} />
           <Route path="/privacy" element={<PrivacyPage />} />
           <Route path="/terms" element={<TermsPage />} />
+          <Route path="/admin" element={<AdminPage />} />
         </Routes>
       </main>
 
@@ -1025,6 +1026,75 @@ function TermsPage() {
       <p style={legalTextStyle}>
         Prices for our products are subject to change without notice. We reserve the right at any time to modify or discontinue the Service (or any part or content thereof) without notice at any time.
       </p>
+    </div>
+  );
+}
+function AdminPage() {
+  const [orders, setOrders] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetch("https://house-of-ar-backend.onrender.com/api/orders")
+      .then(res => res.json())
+      .then(data => {
+        setOrders(data);
+        setLoading(false);
+      })
+      .catch(err => {
+        console.error("Error loading orders", err);
+        setLoading(false);
+      });
+  }, []);
+
+  if (loading) return <div style={legalContainerStyle}>Loading orders...</div>;
+
+  return (
+    <div className="page-transition" style={legalContainerStyle}>
+      <h2 style={legalHeadingStyle}>Admin Dashboard</h2>
+      
+      {orders.length === 0 ? (
+        <p style={legalTextStyle}>No orders found yet.</p>
+      ) : (
+        <div style={{ display: "flex", flexDirection: "column", gap: "30px" }}>
+          {orders.map(order => (
+            <div key={order._id} style={{ border: "1px solid #eee6d8", padding: "25px", background: "#fbf9f5" }}>
+              <div style={{ display: "flex", justifyContent: "space-between", borderBottom: "1px solid #eee6d8", paddingBottom: "15px", marginBottom: "15px" }}>
+                <strong>Order ID: {order.orderId}</strong>
+                <span style={{ color: "var(--muted)", fontSize: "14px" }}>
+                  {new Date(order.createdAt).toLocaleDateString()}
+                </span>
+              </div>
+              
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "20px", fontSize: "14px", color: "var(--muted)", lineHeight: "1.6" }}>
+                <div>
+                  <strong>Customer Details</strong><br />
+                  {order.customerName}<br />
+                  {order.email}<br />
+                  {order.phone}
+                </div>
+                <div>
+                  <strong>Delivery Address</strong><br />
+                  {order.address}<br />
+                  Lucknow, {order.pincode}
+                </div>
+              </div>
+
+              <div style={{ marginTop: "20px", paddingTop: "15px", borderTop: "1px solid #eee6d8" }}>
+                <strong style={{ fontSize: "14px", color: "var(--navy)" }}>Items Purchased (Total: ₹{order.amount})</strong>
+                <ul style={{ margin: "10px 0 0 0", paddingLeft: "20px", fontSize: "14px", color: "var(--muted)" }}>
+                  {order.items && order.items.length > 0 ? (
+                    order.items.map((item, idx) => (
+                      <li key={idx}>{item.quantity}x {item.name}</li>
+                    ))
+                  ) : (
+                    <li>Items not recorded for this order</li>
+                  )}
+                </ul>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
