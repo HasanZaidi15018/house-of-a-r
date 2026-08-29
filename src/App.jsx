@@ -1033,6 +1033,9 @@ function AdminPage() {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
 
+// Grab user from local storage
+  const loggedInUser = JSON.parse(localStorage.getItem("user"));
+  
   // SECURITY CHECK: Instantly block non-admins
   if (!loggedInUser || loggedInUser.email !== "hasanzaidi7949@gmail.com") {
     return (
