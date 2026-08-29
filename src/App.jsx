@@ -176,15 +176,25 @@ const toggleWishlist = (id) => {
     localStorage.setItem("houseOfARWishlist", JSON.stringify(wishlist));
   }, [wishlist]);
 
-const addToCart = (product) => {
+const syncCartToCloud = (updatedCart) => {
+    if (loggedInUser) {
+      fetch("https://house-of-ar-backend.onrender.com/api/cart", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: loggedInUser.email, cart: updatedCart })
+      }).catch(err => console.error("Cloud cart sync failed:", err));
+    }
+  };
+
+  const addToCart = (product) => {
     setCartItems((prevItems) => {
       const existingItem = prevItems.find((item) => item.id === product.id);
-      if (existingItem) {
-        return prevItems.map((item) =>
-          item.id === product.id ? { ...item, quantity: item.quantity + 1 } : item
-        );
-      }
-      return [...prevItems, { ...product, quantity: 1 }];
+      const newCart = existingItem 
+        ? prevItems.map((item) => item.id === product.id ? { ...item, quantity: item.quantity + 1 } : item)
+        : [...prevItems, { ...product, quantity: 1 }];
+      
+      syncCartToCloud(newCart);
+      return newCart;
     });
     
     // Close the product window
@@ -198,20 +208,26 @@ const addToCart = (product) => {
   };
 
   const updateCartQuantity = (id, change) => {
-    setCartItems((prevItems) =>
-      prevItems.map((item) => {
+    setCartItems((prevItems) => {
+      const newCart = prevItems.map((item) => {
         if (item.id === id) {
           const newQuantity = item.quantity + change;
           return newQuantity > 0 ? { ...item, quantity: newQuantity } : item;
         }
         return item;
-      })
-    );
+      });
+      syncCartToCloud(newCart);
+      return newCart;
+    });
   };
 
   const removeFromCart = (id) => {
-    setCartItems((prevItems) => prevItems.filter((item) => item.id !== id));
-    if (cartItems.length === 1) setIsCheckoutView(false);
+    setCartItems((prevItems) => {
+      const newCart = prevItems.filter((item) => item.id !== id);
+      syncCartToCloud(newCart);
+      if (newCart.length === 0) setIsCheckoutView(false); // Fixed logic for empty cart
+      return newCart;
+    });
   };
 
   const closeDrawer = () => {
@@ -490,7 +506,8 @@ onClick={() => {
   isOpen={isAuthOpen} 
   onClose={() => setIsAuthOpen(false)} 
   setLoggedInUser={setLoggedInUser}
-  setWishlist={setWishlist} 
+  setWishlist={setWishlist}
+  setCartItems={setCartItems} 
 />
 
       {/* SEARCH OVERLAY */}

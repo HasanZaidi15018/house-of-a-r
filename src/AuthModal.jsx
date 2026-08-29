@@ -1,6 +1,6 @@
 import { useState } from "react";
 
-export default function AuthModal({ isOpen, onClose, setLoggedInUser, setWishlist }) {
+export default function AuthModal({ isOpen, onClose, setLoggedInUser, setWishlist, setCartItems }) {
   const [isSignUp, setIsSignUp] = useState(false);
   const [formData, setFormData] = useState({ name: "", email: "", password: "" });
   const [error, setError] = useState("");
@@ -40,6 +40,11 @@ export default function AuthModal({ isOpen, onClose, setLoggedInUser, setWishlis
         // Load the saved hearts from the database:
         if (setWishlist && data.user.wishlist) {
           setWishlist(data.user.wishlist);
+        }
+
+        // Load the saved shopping cart:
+        if (setCartItems && data.user.cart) {
+          setCartItems(data.user.cart);
         }
 
         onClose();
