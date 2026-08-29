@@ -126,6 +126,13 @@ const [loggedInUser, setLoggedInUser] = useState(JSON.parse(localStorage.getItem
       }));
     }
   }, [loggedInUser]);
+  
+// REFRESH CART WHEN LOGIN STATE CHANGES
+  useEffect(() => {
+    const storageKey = loggedInUser ? `cart_${loggedInUser.email}` : "houseOfARCart_guest";
+    const saved = localStorage.getItem(storageKey);
+    setCartItems(saved ? JSON.parse(saved) : []);
+  }, [loggedInUser]);
 
   useEffect(() => {
     window.scrollTo(0, 0);
