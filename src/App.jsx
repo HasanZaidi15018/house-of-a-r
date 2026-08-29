@@ -474,7 +474,7 @@ onClick={() => {
           <Route path="/faq" element={<FAQPage />} />
           <Route path="/privacy" element={<PrivacyPage />} />
           <Route path="/terms" element={<TermsPage />} />
-          <Route path="/admin" element={<AdminPage loggedInUser={loggedInUser} />} />
+          <Route path="/admin" element={<AdminPage loggedInUser={user} />} />
         </Routes>
       </main>
 
