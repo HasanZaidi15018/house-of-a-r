@@ -3,59 +3,6 @@ import { Routes, Route, Link, useNavigate, useLocation } from "react-router-dom"
 import "./index.css";
 import AuthModal from './AuthModal';
 
-const products = [
-  {
-    id: 1,
-    name: "Lavendra Noir",
-    subtitle: "Fresh • Elegant • Calming",
-    color: "#6B46C1",
-    image: "/images/lavendra-noir.jpg",
-  },
-  {
-    id: 2,
-    name: "Blush Noir",
-    subtitle: "Romantic • Floral • Soft",
-    color: "#B76E79",
-    image: "/images/blush-noir.jpg",
-    outOfStock: true,
-  },
-  {
-    id: 3,
-    name: "Ivory Oudh",
-    subtitle: "Rich • Woody • Royal",
-    color: "#F2E8D5",
-    image: "/images/ivory-oudh.jpg",
-    outOfStock: true,
-  },
-  {
-    id: 4,
-    name: "Velvet Ember",
-    subtitle: "Floral • Mysterious • Luxurious",
-    color: "#6D1F2F",
-    image: "/images/velvet-ember.jpg",
-  },
-  {
-    id: 5,
-    name: "Azure Oud",
-    subtitle: "Fresh • Woody • Modern ",
-    color: "#0F3D6E",
-    image: "/images/azure-oud.jpg",
-  },
-  {
-    id: 6,
-    name: "Velvet Bloom",
-    subtitle: "Soft • Powdery • Timeless",
-    color: "#D8A7B1",
-    image: "/images/velvet-bloom.jpg",
-  },
-  {
-    id: 7,
-    name: "Legacy",
-    subtitle: "Signature • Bold • Unforgettable",
-    color: "#0F7B5A",
-    image: "/images/legacy.jpg",
-  },
-];
 
 const fragranceFamilies = [
   "Floral",
@@ -76,6 +23,16 @@ const loadRazorpayScript = () => {
 function App() {
   const [activeMenu, setActiveMenu] = useState(null);
   const location = useLocation();
+
+  // Fetch live products from MongoDB
+  const [products, setProducts] = useState([]);
+
+  useEffect(() => {
+    fetch("https://house-of-ar-backend.onrender.com/api/products")
+      .then(res => res.json())
+      .then(data => setProducts(data))
+      .catch(err => console.error("Error loading products:", err));
+  }, []);
   
   // SEARCH STATE
   const [isSearchOpen, setIsSearchOpen] = useState(false);
