@@ -352,7 +352,7 @@ const syncCartToCloud = (updatedCart) => {
         <span>30 ML • LAUNCH OFFER • ₹399</span>
       </div>
 
-      <header className="main-header">
+<header className="main-header" onMouseLeave={() => setActiveMenu(null)}>
         <div className="header-inner">
           <Link to="/" className="brand-logo" onClick={closeMenus}>
             <img src="/images/logo.png" alt="House of A&R" />
@@ -374,7 +374,7 @@ const syncCartToCloud = (updatedCart) => {
             <Link to="/story" className="nav-link" onClick={closeMenus}>OUR STORY</Link>
           </nav>
 
-<div className="header-actions">
+          <div className="header-actions">
             {/* DESKTOP AUTH LINKS - HIDDEN ON MOBILE */}
             <div className="hide-on-mobile">
               {loggedInUser ? (
@@ -422,10 +422,10 @@ const syncCartToCloud = (updatedCart) => {
             <button className="mobile-menu-button" aria-label="Open menu" onClick={() => setIsMobileMenuOpen(true)}>
               <MenuIcon />
             </button>
-</div>
+          </div>
         </div>
-      </header>
 
+        {/* MEGA MENUS (NOW PROPERLY NESTED INSIDE HEADER) */}
         {activeMenu === "shop" && (
           <div className="mega-menu" onMouseLeave={() => setActiveMenu(null)}>
             <div className="mega-menu-grid">
@@ -442,6 +442,7 @@ const syncCartToCloud = (updatedCart) => {
             </div>
           </div>
         )}
+        
         {activeMenu === "perfumes" && (
           <div className="mega-menu" onMouseLeave={() => setActiveMenu(null)}>
             <div className="mega-menu-grid">
@@ -458,6 +459,7 @@ const syncCartToCloud = (updatedCart) => {
             </div>
           </div>
         )}
+      </header>
        {/* MOBILE MENU DRAWER */}
         <div className={`mobile-menu-overlay ${isMobileMenuOpen ? "open" : ""}`}>
           <div className="mobile-menu-header">
