@@ -1039,13 +1039,14 @@ function TermsPage() {
 
 function AdminPage() {
   const [orders, setOrders] = useState([]);
+  const [adminProducts, setAdminProducts] = useState([]);
   const [loading, setLoading] = useState(true);
 
   // Safely grab user from local storage
   const savedUser = localStorage.getItem("user");
   const loggedInUser = savedUser ? JSON.parse(savedUser) : null;
 
-  // SECURITY CHECK: Instantly block non-admins
+  // SECURITY CHECK
   if (!loggedInUser || loggedInUser.email !== "hasanzaidi7949@gmail.com") {
     return (
       <div className="page-transition" style={legalContainerStyle}>
@@ -1056,24 +1057,93 @@ function AdminPage() {
   }
 
   useEffect(() => {
-    fetch("https://house-of-ar-backend.onrender.com/api/orders")
-      .then(res => res.json())
-      .then(data => {
-        setOrders(data);
+    const fetchAdminData = async () => {
+      try {
+        const [ordersRes, productsRes] = await Promise.all([
+          fetch("https://house-of-ar-backend.onrender.com/api/orders"),
+          fetch("https://house-of-ar-backend.onrender.com/api/products")
+        ]);
+        setOrders(await ordersRes.json());
+        setAdminProducts(await productsRes.json());
         setLoading(false);
-      })
-      .catch(err => {
-        console.error("Error loading orders", err);
+      } catch (err) {
+        console.error("Error loading admin data", err);
         setLoading(false);
-      });
+      }
+    };
+    fetchAdminData();
   }, []);
 
-  if (loading) return <div style={legalContainerStyle}>Loading orders...</div>;
+  const toggleStock = async (id, currentStatus) => {
+    try {
+      const res = await fetch(`https://house-of-ar-backend.onrender.com/api/products/${id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ outOfStock: !currentStatus })
+      });
+      const updated = await res.json();
+      setAdminProducts(adminProducts.map(p => p.id === id ? updated : p));
+    } catch (err) {
+      alert("Failed to update stock status.");
+    }
+  };
+
+  const changePrice = async (id, currentPrice) => {
+    const newPrice = prompt(`Enter new price (currently ₹${currentPrice}):`, currentPrice);
+    if (!newPrice || isNaN(newPrice)) return;
+    
+    try {
+      const res = await fetch(`https://house-of-ar-backend.onrender.com/api/products/${id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ price: Number(newPrice) })
+      });
+      const updated = await res.json();
+      setAdminProducts(adminProducts.map(p => p.id === id ? updated : p));
+    } catch (err) {
+      alert("Failed to update price.");
+    }
+  };
+
+  if (loading) return <div style={legalContainerStyle}>Loading secure dashboard...</div>;
 
   return (
     <div className="page-transition" style={legalContainerStyle}>
       <h2 style={legalHeadingStyle}>Admin Dashboard</h2>
       
+      {/* INVENTORY MANAGEMENT SECTION */}
+      <h3 style={legalSubHeadingStyle}>Live Inventory</h3>
+      <div style={{ display: "flex", flexDirection: "column", gap: "15px", marginBottom: "50px" }}>
+        {adminProducts.map(product => (
+          <div key={product.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", border: "1px solid #eee6d8", padding: "15px", background: "#fbf9f5" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "15px" }}>
+              <img src={product.image} alt={product.name} style={{ width: "50px", height: "50px", objectFit: "cover", borderRadius: "4px" }} />
+              <div>
+                <strong style={{ display: "block", color: "var(--navy)" }}>{product.name}</strong>
+                <span style={{ fontSize: "13px", color: "var(--muted)" }}>₹{product.price}</span>
+              </div>
+            </div>
+            
+            <div style={{ display: "flex", gap: "10px" }}>
+              <button 
+                onClick={() => changePrice(product.id, product.price)}
+                style={{ padding: "8px 12px", fontSize: "12px", background: "none", border: "1px solid var(--border)", cursor: "pointer" }}
+              >
+                EDIT PRICE
+              </button>
+              <button 
+                onClick={() => toggleStock(product.id, product.outOfStock)}
+                style={{ padding: "8px 12px", fontSize: "12px", background: product.outOfStock ? "#b76e79" : "var(--navy)", color: "#fff", border: "none", cursor: "pointer" }}
+              >
+                {product.outOfStock ? "MARK IN-STOCK" : "MARK OUT-OF-STOCK"}
+              </button>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* ORDERS SECTION */}
+      <h3 style={legalSubHeadingStyle}>Recent Orders</h3>
       {orders.length === 0 ? (
         <p style={legalTextStyle}>No orders found yet.</p>
       ) : (
@@ -1120,85 +1190,6 @@ function AdminPage() {
     </div>
   );
 }
-
-function MyOrders() {
-  const [orders, setOrders] = useState([]);
-  const [loading, setLoading] = useState(true);
-
-  // Safely grab user from local storage
-  const savedUser = localStorage.getItem("user");
-  const loggedInUser = savedUser ? JSON.parse(savedUser) : null;
-
-  useEffect(() => {
-    if (!loggedInUser) {
-      setLoading(false);
-      return;
-    }
-    
-    // Fetch only this specific user's orders
-    fetch(`https://house-of-ar-backend.onrender.com/api/my-orders/${loggedInUser.email}`)
-      .then(res => res.json())
-      .then(data => {
-        setOrders(data);
-        setLoading(false);
-      })
-      .catch(err => {
-        console.error("Error loading orders", err);
-        setLoading(false);
-      });
-  }, []);
-
-  if (!loggedInUser) {
-    return (
-      <div className="page-transition" style={legalContainerStyle}>
-        <h2 style={legalHeadingStyle}>Please Log In</h2>
-        <p style={legalTextStyle}>You need to be logged in to view your order history.</p>
-      </div>
-    );
-  }
-
-  if (loading) return <div style={legalContainerStyle}>Loading your orders...</div>;
-
-  return (
-    <div className="page-transition" style={legalContainerStyle}>
-      <h2 style={legalHeadingStyle}>My Orders</h2>
-      
-      {orders.length === 0 ? (
-        <p style={legalTextStyle}>You haven't placed any orders yet. Time to add a little luxury to your life!</p>
-      ) : (
-        <div style={{ display: "flex", flexDirection: "column", gap: "30px" }}>
-          {orders.map(order => (
-            <div key={order._id} style={{ border: "1px solid #eee6d8", padding: "25px", background: "#fbf9f5" }}>
-              <div style={{ display: "flex", justifyContent: "space-between", borderBottom: "1px solid #eee6d8", paddingBottom: "15px", marginBottom: "15px" }}>
-                <strong>Order ID: {order.orderId}</strong>
-                <span style={{ color: "var(--muted)", fontSize: "14px" }}>
-                  {new Date(order.createdAt).toLocaleDateString()}
-                </span>
-              </div>
-              
-              <div>
-                <strong style={{ fontSize: "14px", color: "var(--navy)" }}>Total Paid: ₹{order.amount}</strong>
-                <ul style={{ margin: "10px 0 15px 0", paddingLeft: "20px", fontSize: "14px", color: "var(--muted)" }}>
-                  {order.items && order.items.length > 0 ? (
-                    order.items.map((item, idx) => (
-                      <li key={idx}>{item.quantity}x {item.name}</li>
-                    ))
-                  ) : (
-                    <li>Items not recorded for this order</li>
-                  )}
-                </ul>
-                <div style={{ fontSize: "13px", color: "var(--muted)" }}>
-                  <strong>Shipped to:</strong> {order.address}, Lucknow {order.pincode}
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
-    </div>
-  );
-}
-
 /* =========================================================
    REUSABLE UTILITY COMPONENTS
 ========================================================= */
