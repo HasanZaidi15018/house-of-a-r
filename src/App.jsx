@@ -376,10 +376,10 @@ const syncCartToCloud = (updatedCart) => {
 
           <div className="header-actions">
 {loggedInUser ? (
-<div style={{ display: "flex", alignItems: "center", gap: "20px" }}>
+<div className="desktop-auth-links" style={{ display: "flex", alignItems: "center", gap: "20px" }}>
             <Link 
               to="/my-orders" 
-              style={{ textDecoration: "none", color: "#000", cursor: "pointer", fontSize: "13px", fontWeight: "500", letterSpacing: "1px" }}
+              style={{ textDecoration: "none", color: "inherit", cursor: "pointer", fontSize: "13px", fontWeight: "500", letterSpacing: "1px", fontFamily: "inherit" }}
             >
               MY ORDERS
             </Link>
@@ -391,7 +391,7 @@ const syncCartToCloud = (updatedCart) => {
                 setWishlist([]);
                 setCartItems([]);
               }}
-              style={{ background: "none", border: "none", color: "#000", cursor: "pointer", fontSize: "13px", fontWeight: "500", letterSpacing: "1px" }}
+              style={{ background: "none", border: "none", color: "inherit", cursor: "pointer", fontSize: "13px", fontWeight: "500", letterSpacing: "1px", fontFamily: "inherit" }}
             >
               LOGOUT ({loggedInUser.name.split(" ")[0]})
             </button>
@@ -468,43 +468,40 @@ const syncCartToCloud = (updatedCart) => {
             <Link to="/gifting" onClick={() => setIsMobileMenuOpen(false)}>GIFTING</Link>
             <Link to="/story" onClick={() => setIsMobileMenuOpen(false)}>OUR STORY</Link>
           </nav>
-          {/* MOBILE BOTTOM NAV: My Orders & Auth */}
-        <div style={{ marginTop: "auto", borderTop: "1px solid #eee6d8", paddingTop: "25px", display: "flex", flexDirection: "column", gap: "20px", paddingBottom: "20px", paddingLeft: "20px" }}>
-          {loggedInUser ? (
-            <>
-              <Link 
-                to="/my-orders" 
-                onClick={() => setIsMobileMenuOpen(false)}
-                style={{ textDecoration: "none", color: "#000", fontSize: "14px", fontWeight: "500", letterSpacing: "1px" }}
-              >
-                MY ORDERS
-              </Link>
+{/* MOBILE BOTTOM NAV: My Orders & Auth */}
+        <div style={{ marginTop: "auto", width: "100%", borderTop: "1px solid #eee6d8" }}>
+          <nav className="mobile-nav-links" style={{ paddingTop: "15px" }}>
+            {loggedInUser ? (
+              <>
+                <Link to="/my-orders" onClick={() => setIsMobileMenuOpen(false)}>
+                  MY ORDERS
+                </Link>
+                <button 
+                  onClick={() => {
+                    localStorage.removeItem("token");
+                    localStorage.removeItem("user");
+                    setLoggedInUser(null);
+                    setWishlist([]);
+                    setCartItems([]);
+                    setIsMobileMenuOpen(false);
+                  }}
+                  style={{ background: "none", border: "none", width: "100%", textAlign: "left", cursor: "pointer", fontFamily: "inherit", fontSize: "inherit", fontWeight: "inherit", letterSpacing: "inherit", padding: 0, textTransform: "uppercase", color: "inherit" }}
+                >
+                  LOGOUT ({loggedInUser.name.split(" ")[0]})
+                </button>
+              </>
+            ) : (
               <button 
                 onClick={() => {
-                  localStorage.removeItem("token");
-                  localStorage.removeItem("user");
-                  setLoggedInUser(null);
-                  setWishlist([]);
-                  setCartItems([]);
+                  setIsAuthOpen(true); 
                   setIsMobileMenuOpen(false);
                 }}
-                style={{ background: "none", border: "none", color: "#000", cursor: "pointer", fontSize: "14px", fontWeight: "500", letterSpacing: "1px", textAlign: "left", padding: 0 }}
+                style={{ background: "none", border: "none", width: "100%", textAlign: "left", cursor: "pointer", fontFamily: "inherit", fontSize: "inherit", fontWeight: "inherit", letterSpacing: "inherit", padding: 0, textTransform: "uppercase", color: "inherit" }}
               >
-                LOGOUT ({loggedInUser.name.split(" ")[0]})
+                LOGIN
               </button>
-            </>
-          ) : (
-            <button 
-              onClick={() => {
-                setIsAuthOpen(true); 
-                setIsMobileMenuOpen(false);
-              }}
-              style={{ background: "none", border: "none", color: "#000", cursor: "pointer", fontSize: "14px", fontWeight: "500", letterSpacing: "1px", textAlign: "left", padding: 0 }}
-            >
-              LOGIN
-            </button>
-          )}
-        </div>
+            )}
+          </nav>
         </div>
       <main>
         <Routes>
