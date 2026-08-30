@@ -1074,6 +1074,20 @@ function AdminPage() {
     fetchAdminData();
   }, []);
 
+  const updateOrderStatus = async (orderId, newStatus) => {
+    try {
+      await fetch(`https://house-of-ar-backend.onrender.com/api/orders/${orderId}/status`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status: newStatus })
+      });
+      // Update the UI instantly
+      setOrders(orders.map(o => o._id === orderId ? { ...o, status: newStatus } : o));
+    } catch (error) {
+      console.error("Failed to update status", error);
+    }
+  };
+
   const toggleStock = async (id, currentStatus) => {
     try {
       const res = await fetch(`https://house-of-ar-backend.onrender.com/api/products/${id}`, {
@@ -1183,6 +1197,19 @@ function AdminPage() {
                   )}
                 </ul>
               </div>
+              <div style={{ marginTop: "15px", paddingTop: "15px", borderTop: "1px dashed #ccc" }}>
+          <strong style={{ fontSize: "14px", marginRight: "10px" }}>Update Status:</strong>
+          <select 
+            value={order.status || "Order Received"} 
+            onChange={(e) => updateOrderStatus(order._id, e.target.value)}
+            style={{ padding: "5px", fontFamily: "inherit" }}
+          >
+            <option value="Order Received">Order Received</option>
+            <option value="Getting Packed">Getting Packed</option>
+            <option value="Out for Delivery">Out for Delivery</option>
+            <option value="Delivered">Delivered</option>
+          </select>
+        </div>
             </div>
           ))}
         </div>
@@ -1239,12 +1266,19 @@ function MyOrders() {
         <div style={{ display: "flex", flexDirection: "column", gap: "30px" }}>
           {orders.map(order => (
             <div key={order._id} style={{ border: "1px solid #eee6d8", padding: "25px", background: "#fbf9f5" }}>
-              <div style={{ display: "flex", justifyContent: "space-between", borderBottom: "1px solid #eee6d8", paddingBottom: "15px", marginBottom: "15px" }}>
-                <strong>Order ID: {order.orderId}</strong>
-                <span style={{ color: "var(--muted)", fontSize: "14px" }}>
-                  {new Date(order.createdAt).toLocaleDateString()}
-                </span>
-              </div>
+<div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", borderBottom: "1px solid #eee6d8", paddingBottom: "15px", marginBottom: "15px" }}>
+  <div>
+    <strong style={{ display: "block" }}>Order ID: {order.orderId}</strong>
+    <span style={{ color: "var(--muted)", fontSize: "12px" }}>{new Date(order.createdAt).toLocaleDateString()}</span>
+  </div>
+  <span style={{
+    background: order.status === "Delivered" ? "#d4edda" : (order.status === "Out for Delivery" ? "#cce5ff" : "#fff3cd"),
+    color: order.status === "Delivered" ? "#155724" : (order.status === "Out for Delivery" ? "#004085" : "#856404"),
+    padding: "5px 10px", borderRadius: "20px", fontSize: "12px", fontWeight: "bold"
+  }}>
+    {order.status || "Order Received"}
+  </span>
+</div>
               
               <div>
                 <strong style={{ fontSize: "14px", color: "var(--navy)" }}>Total Paid: ₹{order.amount}</strong>
