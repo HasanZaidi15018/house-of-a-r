@@ -468,6 +468,43 @@ const syncCartToCloud = (updatedCart) => {
             <Link to="/gifting" onClick={() => setIsMobileMenuOpen(false)}>GIFTING</Link>
             <Link to="/story" onClick={() => setIsMobileMenuOpen(false)}>OUR STORY</Link>
           </nav>
+          {/* MOBILE BOTTOM NAV: My Orders & Auth */}
+        <div style={{ marginTop: "auto", borderTop: "1px solid #eee6d8", paddingTop: "25px", display: "flex", flexDirection: "column", gap: "20px", paddingBottom: "20px", paddingLeft: "20px" }}>
+          {loggedInUser ? (
+            <>
+              <Link 
+                to="/my-orders" 
+                onClick={() => setIsMobileMenuOpen(false)}
+                style={{ textDecoration: "none", color: "#000", fontSize: "14px", fontWeight: "500", letterSpacing: "1px" }}
+              >
+                MY ORDERS
+              </Link>
+              <button 
+                onClick={() => {
+                  localStorage.removeItem("token");
+                  localStorage.removeItem("user");
+                  setLoggedInUser(null);
+                  setWishlist([]);
+                  setCartItems([]);
+                  setIsMobileMenuOpen(false);
+                }}
+                style={{ background: "none", border: "none", color: "#000", cursor: "pointer", fontSize: "14px", fontWeight: "500", letterSpacing: "1px", textAlign: "left", padding: 0 }}
+              >
+                LOGOUT ({loggedInUser.name.split(" ")[0]})
+              </button>
+            </>
+          ) : (
+            <button 
+              onClick={() => {
+                setIsAuthOpen(true); 
+                setIsMobileMenuOpen(false);
+              }}
+              style={{ background: "none", border: "none", color: "#000", cursor: "pointer", fontSize: "14px", fontWeight: "500", letterSpacing: "1px", textAlign: "left", padding: 0 }}
+            >
+              LOGIN
+            </button>
+          )}
+        </div>
         </div>
       <main>
         <Routes>
