@@ -241,7 +241,7 @@ const syncCartToCloud = (updatedCart) => {
         order_id: orderData.id,  
         
           notes: {
-          order_details: cart.map(item => `${item.quantity}x ${item.name}`).join(", "),
+          order_details: cartItems.map(item => `${item.quantity}x ${item.name}`).join(", "),
           customer_name: "Customer Name", // Replace with your actual state variable
           phone: "Customer Phone",       // Replace with your actual state variable
           address: "Customer Address",   // Replace with your actual state variable
