@@ -1190,6 +1190,84 @@ function AdminPage() {
     </div>
   );
 }
+
+function MyOrders() {
+  const [orders, setOrders] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  // Safely grab user from local storage
+  const savedUser = localStorage.getItem("user");
+  const loggedInUser = savedUser ? JSON.parse(savedUser) : null;
+
+  useEffect(() => {
+    if (!loggedInUser) {
+      setLoading(false);
+      return;
+    }
+    
+    // Fetch only this specific user's orders
+    fetch(`https://house-of-ar-backend.onrender.com/api/my-orders/${loggedInUser.email}`)
+      .then(res => res.json())
+      .then(data => {
+        setOrders(data);
+        setLoading(false);
+      })
+      .catch(err => {
+        console.error("Error loading orders", err);
+        setLoading(false);
+      });
+  }, []);
+
+  if (!loggedInUser) {
+    return (
+      <div className="page-transition" style={legalContainerStyle}>
+        <h2 style={legalHeadingStyle}>Please Log In</h2>
+        <p style={legalTextStyle}>You need to be logged in to view your order history.</p>
+      </div>
+    );
+  }
+
+  if (loading) return <div style={legalContainerStyle}>Loading your orders...</div>;
+
+  return (
+    <div className="page-transition" style={legalContainerStyle}>
+      <h2 style={legalHeadingStyle}>My Orders</h2>
+      
+      {orders.length === 0 ? (
+        <p style={legalTextStyle}>You haven't placed any orders yet. Time to add a little luxury to your life!</p>
+      ) : (
+        <div style={{ display: "flex", flexDirection: "column", gap: "30px" }}>
+          {orders.map(order => (
+            <div key={order._id} style={{ border: "1px solid #eee6d8", padding: "25px", background: "#fbf9f5" }}>
+              <div style={{ display: "flex", justifyContent: "space-between", borderBottom: "1px solid #eee6d8", paddingBottom: "15px", marginBottom: "15px" }}>
+                <strong>Order ID: {order.orderId}</strong>
+                <span style={{ color: "var(--muted)", fontSize: "14px" }}>
+                  {new Date(order.createdAt).toLocaleDateString()}
+                </span>
+              </div>
+              
+              <div>
+                <strong style={{ fontSize: "14px", color: "var(--navy)" }}>Total Paid: ₹{order.amount}</strong>
+                <ul style={{ margin: "10px 0 15px 0", paddingLeft: "20px", fontSize: "14px", color: "var(--muted)" }}>
+                  {order.items && order.items.length > 0 ? (
+                    order.items.map((item, idx) => (
+                      <li key={idx}>{item.quantity}x {item.name}</li>
+                    ))
+                  ) : (
+                    <li>Items not recorded for this order</li>
+                  )}
+                </ul>
+                <div style={{ fontSize: "13px", color: "var(--muted)" }}>
+                  <strong>Shipped to:</strong> {order.address}, Lucknow {order.pincode}
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
 /* =========================================================
    REUSABLE UTILITY COMPONENTS
 ========================================================= */
