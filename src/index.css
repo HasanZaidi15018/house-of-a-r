@@ -2300,8 +2300,8 @@ img {
 .mobile-menu-close { background: none; border: none; font-size: 24px; cursor: pointer; color: #102943; }
 .mobile-nav-links { display: flex; flex-direction: column; padding: 40px 5vw; gap: 24px; }
 .mobile-nav-links a { text-decoration: none; color: #102943; font-size: 16px; letter-spacing: 0.1em; border-bottom: 1px solid #eaeaea; padding-bottom: 10px; }
-@media (max-width: 768px) {
-  .desktop-auth-links {
+@media screen and (max-width: 900px) {
+  .hide-on-mobile {
     display: none !important;
   }
 }

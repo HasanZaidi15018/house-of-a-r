@@ -374,36 +374,40 @@ const syncCartToCloud = (updatedCart) => {
             <Link to="/story" className="nav-link" onClick={closeMenus}>OUR STORY</Link>
           </nav>
 
-          <div className="header-actions">
-{loggedInUser ? (
-<div className="desktop-auth-links" style={{ display: "flex", alignItems: "center", gap: "20px" }}>
-            <Link 
-              to="/my-orders" 
-              style={{ textDecoration: "none", color: "inherit", cursor: "pointer", fontSize: "13px", fontWeight: "500", letterSpacing: "1px", fontFamily: "inherit" }}
-            >
-              MY ORDERS
-            </Link>
-            <button 
-              onClick={() => {
-                localStorage.removeItem("token");
-                localStorage.removeItem("user");
-                setLoggedInUser(null);
-                setWishlist([]);
-                setCartItems([]);
-              }}
-              style={{ background: "none", border: "none", color: "inherit", cursor: "pointer", fontSize: "13px", fontWeight: "500", letterSpacing: "1px", fontFamily: "inherit" }}
-            >
-              LOGOUT ({loggedInUser.name.split(" ")[0]})
-            </button>
-          </div>
-) : (
-  <button 
-    onClick={() => setIsAuthOpen(true)}
-    style={{ background: "none", border: "none", color: "#000", cursor: "pointer", fontSize: "13px", fontWeight: "500", letterSpacing: "1px", textTransform: "uppercase", fontFamily: "inherit", whiteSpace: "nowrap" }}
-  >
-    LOGIN
-  </button>
-)}
+<div className="header-actions">
+            {/* DESKTOP AUTH LINKS - HIDDEN ON MOBILE */}
+            <div className="hide-on-mobile">
+              {loggedInUser ? (
+                <div style={{ display: "flex", alignItems: "center", gap: "20px" }}>
+                  <Link 
+                    to="/my-orders" 
+                    style={{ textDecoration: "none", color: "inherit", cursor: "pointer", fontSize: "13px", fontWeight: "500", letterSpacing: "1px", fontFamily: "inherit" }}
+                  >
+                    MY ORDERS
+                  </Link>
+                  <button 
+                    onClick={() => {
+                      localStorage.removeItem("token");
+                      localStorage.removeItem("user");
+                      setLoggedInUser(null);
+                      setWishlist([]);
+                      setCartItems([]);
+                    }}
+                    style={{ background: "none", border: "none", color: "inherit", cursor: "pointer", fontSize: "13px", fontWeight: "500", letterSpacing: "1px", fontFamily: "inherit" }}
+                  >
+                    LOGOUT ({loggedInUser.name.split(" ")[0]})
+                  </button>
+                </div>
+              ) : (
+                <button 
+                  onClick={() => setIsAuthOpen(true)}
+                  style={{ background: "none", border: "none", color: "inherit", cursor: "pointer", fontSize: "13px", fontWeight: "500", letterSpacing: "1px", fontFamily: "inherit" }}
+                >
+                  LOGIN
+                </button>
+              )}
+            </div>
+
             <button className="icon-button" aria-label="Search" onClick={() => setIsSearchOpen(true)}>
               <SearchIcon />
             </button>
@@ -415,11 +419,12 @@ const syncCartToCloud = (updatedCart) => {
               <BagIcon />
               {cartCount > 0 && <span className="icon-badge">{cartCount}</span>}
             </button>
-<button className="mobile-menu-button" aria-label="Open menu" onClick={() => setIsMobileMenuOpen(true)}>
+            <button className="mobile-menu-button" aria-label="Open menu" onClick={() => setIsMobileMenuOpen(true)}>
               <MenuIcon />
             </button>
-          </div>
+</div>
         </div>
+      </header>
 
         {activeMenu === "shop" && (
           <div className="mega-menu" onMouseLeave={() => setActiveMenu(null)}>
@@ -453,7 +458,6 @@ const syncCartToCloud = (updatedCart) => {
             </div>
           </div>
         )}
-      </header>
        {/* MOBILE MENU DRAWER */}
         <div className={`mobile-menu-overlay ${isMobileMenuOpen ? "open" : ""}`}>
           <div className="mobile-menu-header">
@@ -503,6 +507,7 @@ const syncCartToCloud = (updatedCart) => {
             )}
           </nav>
         </div>
+      </div>
       <main>
         <Routes>
           <Route path="/" element={<HomePage {...pageProps} />} />
