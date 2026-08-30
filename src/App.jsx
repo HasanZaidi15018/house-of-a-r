@@ -212,7 +212,7 @@ const syncCartToCloud = (updatedCart) => {
 
   const deliveryCharges = 59;
   const cartCount = cartItems.reduce((count, item) => count + item.quantity, 0);
-  const cartSubtotal = cartItems.reduce((total, item) => total + (399 * item.quantity), 0);
+  const cartSubtotal = cartItems.reduce((total, item) => total + ((item.price || 399) * item.quantity), 0);
   const cartTotal = cartItems.length > 0 ? cartSubtotal + deliveryCharges : 0;
 
   const handlePaymentProceed = async (e) => {
@@ -575,12 +575,12 @@ const syncCartToCloud = (updatedCart) => {
                   <div className="section-label">HOUSE OF A&amp;R • FINE FRAGRANCES</div>
                   <h2>{selectedProduct.name}</h2>
                   <p className="product-detail-subtitle">{selectedProduct.subtitle}</p>
-                  <div className="product-detail-price"><span className="old-price">₹799</span><span className="sale-price">₹399</span></div>
-                  <div className="product-detail-divider"></div>
-                  <p className="product-detail-description">A refined fragrance created to complement your mood, your moment and your individuality. Designed for everyday elegance with a lasting impression.</p>
-                  <div className="product-detail-facts">
-                    <div><span>SIZE</span><strong>30 ML</strong></div>
-                    <div><span>PRICE</span><strong>₹399</strong></div>
+<div className="product-detail-price"><span className="old-price">₹{selectedProduct.oldPrice || 799}</span><span className="sale-price">₹{selectedProduct.price || 399}</span></div>
+                <div className="product-detail-divider"></div>
+                <p className="product-detail-description">A refined fragrance created to complement your mood, your moment and your individuality. Designed for everyday elegance with a lasting impression.</p>
+                <div className="product-detail-facts">
+                  <div><span>SIZE</span><strong>30 ML</strong></div>
+                  <div><span>PRICE</span><strong>₹{selectedProduct.price || 399}</strong></div>
                     <div><span>DELIVERY</span><strong>LUCKNOW</strong></div>
                   </div>
 <div className="product-detail-actions">
@@ -652,7 +652,7 @@ const syncCartToCloud = (updatedCart) => {
                       <button className="remove-item" onClick={() => removeFromCart(item.id)}>Remove</button>
                     </div>
                   </div>
-                  <div className="cart-item-price"><strong>₹{399 * item.quantity}</strong></div>
+                  <div className="cart-item-price"><strong>₹{(item.price || 399) * item.quantity}</strong></div>
                 </div>
               ))
             )}
@@ -804,7 +804,7 @@ function WishlistPage({ products, wishlist, toggleWishlist, addToCart, openProdu
                   </button>
                   <div className="wishlist-card-info">
                     <div><h3>{product.name}</h3><p>{product.subtitle}</p></div>
-                    <div className="wishlist-card-price"><span className="old-price">₹799</span><strong>₹399</strong></div>
+                    <div className="wishlist-card-price"><span className="old-price">₹{product.oldPrice || 799}</span><strong>₹{product.price || 399}</strong></div>
                   </div>
                   <div className="wishlist-card-actions">
                     <button className="wishlist-card-cart" onClick={() => addToCart(product)}>ADD TO CART <span>+</span></button>
@@ -1301,7 +1301,7 @@ function ProductCard({ product, toggleWishlist, wishlist, addToCart, openProduct
       </div>
       <div className="product-info">
         <h3>{product.name}</h3><p>{product.subtitle}</p>
-        <div className="price"><span className="old-price">₹799</span><span className="sale-price">₹399</span></div>
+        <div className="price"><span className="old-price">₹{product.oldPrice || 799}</span><span className="sale-price">₹{product.price || 399}</span></div>
       </div>
     </article>
   );
