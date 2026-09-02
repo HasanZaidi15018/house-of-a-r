@@ -1041,6 +1041,9 @@ function AdminPage() {
   const [orders, setOrders] = useState([]);
   const [adminProducts, setAdminProducts] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState("orders");
+  const [registeredUsers, setRegisteredUsers] = useState([]);
+  const [totalUsers, setTotalUsers] = useState(0);
 
   // Safely grab user from local storage
   const savedUser = localStorage.getItem("user");
@@ -1055,6 +1058,16 @@ function AdminPage() {
       </div>
     );
   }
+
+  useEffect(() => {
+    fetch("https://house-of-ar-backend.onrender.com/api/admin/users")
+      .then((res) => res.json())
+      .then((data) => {
+        setTotalUsers(data.total || 0);
+        setRegisteredUsers(data.users || []);
+      })
+      .catch((err) => console.error("Error loading users:", err));
+  }, []);
 
   useEffect(() => {
     const fetchAdminData = async () => {
@@ -1156,6 +1169,23 @@ function AdminPage() {
         ))}
       </div>
 
+      {/* Admin Navigation Tabs */}
+      <div style={{ display: "flex", gap: "10px", margin: "20px 0" }}>
+        <button 
+          onClick={() => setActiveTab("orders")}
+          style={{ padding: "8px 16px", background: activeTab === "orders" ? "var(--navy)" : "#eee", color: activeTab === "orders" ? "#fff" : "#333", border: "none", cursor: "pointer", borderRadius: "4px", fontWeight: "bold" }}>
+          Orders ({orders.length})
+        </button>
+        <button 
+          onClick={() => setActiveTab("users")}
+          style={{ padding: "8px 16px", background: activeTab === "users" ? "var(--navy)" : "#eee", color: activeTab === "users" ? "#fff" : "#333", border: "none", cursor: "pointer", borderRadius: "4px", fontWeight: "bold" }}>
+          Registered Customers ({totalUsers})
+        </button>
+      </div>
+
+      {/* WRAPPER FOR ORDERS - ONLY SHOWS WHEN ACTIVE TAB IS 'ORDERS' */}
+      <div style={{ display: activeTab === "orders" ? "block" : "none" }}>
+
       {/* ORDERS SECTION */}
       <h3 style={legalSubHeadingStyle}>Recent Orders</h3>
       {orders.length === 0 ? (
@@ -1215,6 +1245,34 @@ function AdminPage() {
         </div>
       )}
     </div>
+
+      {/* WRAPPER FOR USERS - ONLY SHOWS WHEN ACTIVE TAB IS 'USERS' */}
+      <div style={{ display: activeTab === "users" ? "block" : "none" }}>
+        <div style={{ background: "#fff", padding: "20px", borderRadius: "8px", border: "1px solid #eee" }}>
+          <h3 style={{ marginTop: 0 }}>Customer Directory</h3>
+          <table style={{ width: "100%", borderCollapse: "collapse", marginTop: "15px", textAlign: "left" }}>
+            <thead>
+              <tr style={{ borderBottom: "2px solid #ddd", fontSize: "14px" }}>
+                <th style={{ padding: "10px" }}>Name</th>
+                <th style={{ padding: "10px" }}>Email</th>
+                <th style={{ padding: "10px" }}>Joined Date</th>
+                <th style={{ padding: "10px" }}>User ID</th>
+              </tr>
+            </thead>
+            <tbody>
+              {registeredUsers.map((u) => (
+                <tr key={u._id} style={{ borderBottom: "1px solid #eee", fontSize: "13px" }}>
+                  <td style={{ padding: "10px" }}>{u.name || "N/A"}</td>
+                  <td style={{ padding: "10px" }}>{u.email}</td>
+                  <td style={{ padding: "10px" }}>{u.createdAt ? new Date(u.createdAt).toLocaleDateString() : "Prior to tracking"}</td>
+                  <td style={{ padding: "10px", color: "gray", fontSize: "11px" }}>{u._id}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+      </div>
   );
 }
 
