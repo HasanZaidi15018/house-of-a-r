@@ -1042,6 +1042,7 @@ function AdminPage() {
   const [adminProducts, setAdminProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("analytics");
+  const [orderFilter, setOrderFilter] = useState("All");
   const [registeredUsers, setRegisteredUsers] = useState([]);
   const [totalUsers, setTotalUsers] = useState(0);
 
@@ -1216,68 +1217,104 @@ function AdminPage() {
         </div>
       </div>
 
-      {/* 3. WRAPPER FOR ORDERS */}
+{/* 3. WRAPPER FOR ORDERS */}
       <div style={{ display: activeTab === "orders" ? "block" : "none" }}>
+        
+        {/* FILTER PILLS NAV */}
+        <div style={{ display: "flex", gap: "10px", marginBottom: "25px", flexWrap: "wrap", borderBottom: "1px solid #eee6d8", paddingBottom: "15px" }}>
+          {["All", "Order Received", "Getting Packed", "Out for Delivery", "Delivered"].map(status => {
+            // Count how many orders match this status
+            const count = status === "All" 
+              ? orders.length 
+              : orders.filter(o => (o.status || "Order Received") === status).length;
 
-      {/* ORDERS SECTION */}
-      <h3 style={legalSubHeadingStyle}>Recent Orders</h3>
-      {orders.length === 0 ? (
-        <p style={legalTextStyle}>No orders found yet.</p>
-      ) : (
-        <div style={{ display: "flex", flexDirection: "column", gap: "30px" }}>
-          {orders.map(order => (
-            <div key={order._id} style={{ border: "1px solid #eee6d8", padding: "25px", background: "#fbf9f5" }}>
-              <div style={{ display: "flex", justifyContent: "space-between", borderBottom: "1px solid #eee6d8", paddingBottom: "15px", marginBottom: "15px" }}>
-                <strong>Order ID: {order.orderId}</strong>
-                <span style={{ color: "var(--muted)", fontSize: "14px" }}>
-                  {new Date(order.createdAt).toLocaleDateString()}
-                </span>
-              </div>
-              
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "20px", fontSize: "14px", color: "var(--muted)", lineHeight: "1.6" }}>
-                <div>
-                  <strong>Customer Details</strong><br />
-                  {order.customerName}<br />
-                  {order.email}<br />
-                  {order.phone}
-                </div>
-                <div>
-                  <strong>Delivery Address</strong><br />
-                  {order.address}<br />
-                  Lucknow, {order.pincode}
-                </div>
-              </div>
+            return (
+              <button
+                key={status}
+                onClick={() => setOrderFilter(status)}
+                style={{ 
+                  padding: "6px 14px", borderRadius: "20px", border: "1px solid var(--navy)", 
+                  background: orderFilter === status ? "var(--navy)" : "#fff", 
+                  color: orderFilter === status ? "#fff" : "var(--navy)", 
+                  fontSize: "12px", cursor: "pointer", fontWeight: "bold", transition: "all 0.2s" 
+                }}
+              >
+                {status === "All" ? "All Orders" : status} ({count})
+              </button>
+            );
+          })}
+        </div>
 
-              <div style={{ marginTop: "20px", paddingTop: "15px", borderTop: "1px solid #eee6d8" }}>
-                <strong style={{ fontSize: "14px", color: "var(--navy)" }}>Items Purchased (Total: ₹{order.amount})</strong>
-                <ul style={{ margin: "10px 0 0 0", paddingLeft: "20px", fontSize: "14px", color: "var(--muted)" }}>
-                  {order.items && order.items.length > 0 ? (
-                    order.items.map((item, idx) => (
-                      <li key={idx}>{item.quantity}x {item.name}</li>
-                    ))
-                  ) : (
-                    <li>Items not recorded for this order</li>
-                  )}
-                </ul>
+        {/* ORDERS LIST */}
+        {orders.length === 0 ? (
+          <p style={legalTextStyle}>No orders found yet.</p>
+        ) : (
+          <div style={{ display: "flex", flexDirection: "column", gap: "30px" }}>
+            {orders
+              .filter(order => orderFilter === "All" || (order.status || "Order Received") === orderFilter)
+              .map(order => (
+              <div key={order._id} style={{ border: "1px solid #eee6d8", padding: "25px", background: "#fbf9f5", borderRadius: "8px" }}>
+                
+                {/* ORDER HEADER WITH VISUAL BADGE */}
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", borderBottom: "1px solid #eee6d8", paddingBottom: "15px", marginBottom: "15px" }}>
+                  <div>
+                    <strong style={{ display: "block", color: "var(--navy)", fontSize: "16px" }}>Order ID: {order.orderId}</strong>
+                    <span style={{ color: "var(--muted)", fontSize: "13px" }}>{new Date(order.createdAt).toLocaleDateString()}</span>
+                  </div>
+                  <span style={{
+                    background: (order.status || "Order Received") === "Delivered" ? "#d4edda" : ((order.status || "Order Received") === "Out for Delivery" ? "#cce5ff" : "#fff3cd"),
+                    color: (order.status || "Order Received") === "Delivered" ? "#155724" : ((order.status || "Order Received") === "Out for Delivery" ? "#004085" : "#856404"),
+                    padding: "6px 12px", borderRadius: "4px", fontSize: "11px", fontWeight: "bold", textTransform: "uppercase", letterSpacing: "0.5px"
+                  }}>
+                    {order.status || "Order Received"}
+                  </span>
+                </div>
+                
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "20px", fontSize: "14px", color: "var(--muted)", lineHeight: "1.6" }}>
+                  <div>
+                    <strong style={{ color: "var(--navy)" }}>Customer Details</strong><br />
+                    {order.customerName}<br />
+                    {order.email}<br />
+                    {order.phone}
+                  </div>
+                  <div>
+                    <strong style={{ color: "var(--navy)" }}>Delivery Address</strong><br />
+                    {order.address}<br />
+                    Lucknow, {order.pincode}
+                  </div>
+                </div>
+
+                <div style={{ marginTop: "20px", paddingTop: "15px", borderTop: "1px solid #eee6d8" }}>
+                  <strong style={{ fontSize: "14px", color: "var(--navy)" }}>Items Purchased (Total: ₹{order.amount})</strong>
+                  <ul style={{ margin: "10px 0 0 0", paddingLeft: "20px", fontSize: "14px", color: "var(--muted)" }}>
+                    {order.items && order.items.length > 0 ? (
+                      order.items.map((item, idx) => (
+                        <li key={idx}>{item.quantity}x {item.name}</li>
+                      ))
+                    ) : (
+                      <li>Items not recorded for this order</li>
+                    )}
+                  </ul>
+                </div>
+
+                <div style={{ marginTop: "20px", paddingTop: "15px", borderTop: "1px dashed #ccc", display: "flex", alignItems: "center", gap: "10px" }}>
+                  <strong style={{ fontSize: "14px", color: "var(--navy)" }}>Update Status:</strong>
+                  <select 
+                    value={order.status || "Order Received"} 
+                    onChange={(e) => updateOrderStatus(order._id, e.target.value)}
+                    style={{ padding: "8px", fontFamily: "inherit", borderRadius: "4px", border: "1px solid var(--border)", background: "#fff", cursor: "pointer" }}
+                  >
+                    <option value="Order Received">Order Received</option>
+                    <option value="Getting Packed">Getting Packed</option>
+                    <option value="Out for Delivery">Out for Delivery</option>
+                    <option value="Delivered">Delivered</option>
+                  </select>
+                </div>
               </div>
-              <div style={{ marginTop: "15px", paddingTop: "15px", borderTop: "1px dashed #ccc" }}>
-          <strong style={{ fontSize: "14px", marginRight: "10px" }}>Update Status:</strong>
-          <select 
-            value={order.status || "Order Received"} 
-            onChange={(e) => updateOrderStatus(order._id, e.target.value)}
-            style={{ padding: "5px", fontFamily: "inherit" }}
-          >
-            <option value="Order Received">Order Received</option>
-            <option value="Getting Packed">Getting Packed</option>
-            <option value="Out for Delivery">Out for Delivery</option>
-            <option value="Delivered">Delivered</option>
-          </select>
-        </div>
-            </div>
-          ))}
-        </div>
-      )}
-    </div>
+            ))}
+          </div>
+        )}
+      </div>
 
       {/* WRAPPER FOR USERS - ONLY SHOWS WHEN ACTIVE TAB IS 'USERS' */}
       <div style={{ display: activeTab === "users" ? "block" : "none" }}>
