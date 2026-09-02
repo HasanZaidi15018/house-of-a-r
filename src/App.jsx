@@ -1132,11 +1132,58 @@ function AdminPage() {
     }
   };
 
+  // --- ANALYTICS CALCULATIONS ---
+  const totalRevenue = orders.reduce((sum, order) => sum + (Number(order.amount) || 0), 0);
+
+  const currentMonth = new Date().getMonth();
+  const currentYear = new Date().getFullYear();
+  const ordersThisMonth = orders.filter(order => {
+    if (!order.createdAt) return false;
+    const orderDate = new Date(order.createdAt);
+    return orderDate.getMonth() === currentMonth && orderDate.getFullYear() === currentYear;
+  }).length;
+
+  let topSellingScent = "No data yet";
+  let maxSold = 0;
+  const productCounts = {};
+
+  orders.forEach(order => {
+    if (order.items) {
+      order.items.forEach(item => {
+        productCounts[item.name] = (productCounts[item.name] || 0) + item.quantity;
+        if (productCounts[item.name] > maxSold) {
+          maxSold = productCounts[item.name];
+          topSellingScent = item.name;
+        }
+      });
+    }
+  });
+  // ------------------------------
+
   if (loading) return <div style={legalContainerStyle}>Loading secure dashboard...</div>;
 
   return (
     <div className="page-transition" style={legalContainerStyle}>
       <h2 style={legalHeadingStyle}>Admin Dashboard</h2>
+
+      {/* ANALYTICS BAR */}
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: "20px", marginBottom: "40px" }}>
+        <div style={{ padding: "20px", background: "#fff", border: "1px solid #eee6d8", borderRadius: "8px", borderLeft: "4px solid var(--navy)", boxShadow: "0 2px 8px rgba(0,0,0,0.02)" }}>
+          <div style={{ fontSize: "12px", color: "var(--muted)", textTransform: "uppercase", letterSpacing: "1px", marginBottom: "8px" }}>Total Revenue</div>
+          <div style={{ fontSize: "28px", fontWeight: "bold", color: "var(--navy)" }}>₹{totalRevenue.toLocaleString()}</div>
+        </div>
+        
+        <div style={{ padding: "20px", background: "#fff", border: "1px solid #eee6d8", borderRadius: "8px", borderLeft: "4px solid #b76e79", boxShadow: "0 2px 8px rgba(0,0,0,0.02)" }}>
+          <div style={{ fontSize: "12px", color: "var(--muted)", textTransform: "uppercase", letterSpacing: "1px", marginBottom: "8px" }}>Orders This Month</div>
+          <div style={{ fontSize: "28px", fontWeight: "bold", color: "var(--navy)" }}>{ordersThisMonth}</div>
+        </div>
+
+        <div style={{ padding: "20px", background: "#fff", border: "1px solid #eee6d8", borderRadius: "8px", borderLeft: "4px solid #c9b18d", boxShadow: "0 2px 8px rgba(0,0,0,0.02)" }}>
+          <div style={{ fontSize: "12px", color: "var(--muted)", textTransform: "uppercase", letterSpacing: "1px", marginBottom: "8px" }}>Top Selling Scent</div>
+          <div style={{ fontSize: "20px", fontWeight: "bold", color: "var(--navy)", lineHeight: "1.2", marginTop: "4px" }}>{topSellingScent}</div>
+          {maxSold > 0 && <div style={{ fontSize: "12px", color: "var(--muted)", marginTop: "8px" }}>{maxSold} units sold</div>}
+        </div>
+      </div>
       
       {/* INVENTORY MANAGEMENT SECTION */}
       <h3 style={legalSubHeadingStyle}>Live Inventory</h3>
