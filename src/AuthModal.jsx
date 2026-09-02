@@ -42,11 +42,6 @@ export default function AuthModal({ isOpen, onClose, setLoggedInUser, setWishlis
           setWishlist(data.user.wishlist);
         }
 
-        // Load the saved shopping cart:
-        if (setCartItems && data.user.cart) {
-          setCartItems(data.user.cart);
-        }
-
         onClose();
       }
     } catch (err) {

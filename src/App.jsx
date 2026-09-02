@@ -1364,14 +1364,21 @@ function MyOrders() {
    REUSABLE UTILITY COMPONENTS
 ========================================================= */
 function ProductCard({ product, toggleWishlist, wishlist, addToCart, openProduct }) {
+  const [imgLoaded, setImgLoaded] = useState(false);
+
   return (
     <article className="product-card" onClick={() => openProduct(product)}>
-      <div className="product-image-wrapper">
-        <img src={product.image} alt={product.name} />
+      <div className="product-image-wrapper" style={{ position: "relative", minHeight: "300px" }}>
+        {!imgLoaded && <div className="skeleton-box"></div>}
+        <img 
+          src={product.image} 
+          alt={product.name} 
+          loading="lazy"
+          onLoad={() => setImgLoaded(true)}
+          style={{ opacity: imgLoaded ? 1 : 0, transition: "opacity 0.4s ease" }}
+        />
         
-        {/* SOLD OUT BADGE */}
         {product.outOfStock && <span className="product-badge-oos">SOLD OUT</span>}
-        
         <span className="product-size">30 ML</span>
         <button
           className={`product-wishlist ${wishlist.includes(product.id) ? "active" : ""}`}
