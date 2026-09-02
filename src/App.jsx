@@ -1041,7 +1041,7 @@ function AdminPage() {
   const [orders, setOrders] = useState([]);
   const [adminProducts, setAdminProducts] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState("orders");
+  const [activeTab, setActiveTab] = useState("analytics");
   const [registeredUsers, setRegisteredUsers] = useState([]);
   const [totalUsers, setTotalUsers] = useState(0);
 
@@ -1164,73 +1164,59 @@ function AdminPage() {
 
   return (
     <div className="page-transition" style={legalContainerStyle}>
-      <h2 style={legalHeadingStyle}>Admin Dashboard</h2>
+<h2 style={legalHeadingStyle}>Admin Dashboard</h2>
 
-      {/* ANALYTICS BAR */}
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: "20px", marginBottom: "40px" }}>
-        <div style={{ padding: "20px", background: "#fff", border: "1px solid #eee6d8", borderRadius: "8px", borderLeft: "4px solid var(--navy)", boxShadow: "0 2px 8px rgba(0,0,0,0.02)" }}>
-          <div style={{ fontSize: "12px", color: "var(--muted)", textTransform: "uppercase", letterSpacing: "1px", marginBottom: "8px" }}>Total Revenue</div>
-          <div style={{ fontSize: "28px", fontWeight: "bold", color: "var(--navy)" }}>₹{totalRevenue.toLocaleString()}</div>
-        </div>
-        
-        <div style={{ padding: "20px", background: "#fff", border: "1px solid #eee6d8", borderRadius: "8px", borderLeft: "4px solid #b76e79", boxShadow: "0 2px 8px rgba(0,0,0,0.02)" }}>
-          <div style={{ fontSize: "12px", color: "var(--muted)", textTransform: "uppercase", letterSpacing: "1px", marginBottom: "8px" }}>Orders This Month</div>
-          <div style={{ fontSize: "28px", fontWeight: "bold", color: "var(--navy)" }}>{ordersThisMonth}</div>
-        </div>
+      {/* Admin Navigation Tabs (Now with 4 Tabs) */}
+      <div style={{ display: "flex", gap: "10px", margin: "20px 0", flexWrap: "wrap" }}>
+        <button onClick={() => setActiveTab("analytics")} style={{ padding: "8px 16px", background: activeTab === "analytics" ? "var(--navy)" : "#eee", color: activeTab === "analytics" ? "#fff" : "#333", border: "none", cursor: "pointer", borderRadius: "4px", fontWeight: "bold" }}>Overview</button>
+        <button onClick={() => setActiveTab("inventory")} style={{ padding: "8px 16px", background: activeTab === "inventory" ? "var(--navy)" : "#eee", color: activeTab === "inventory" ? "#fff" : "#333", border: "none", cursor: "pointer", borderRadius: "4px", fontWeight: "bold" }}>Live Inventory</button>
+        <button onClick={() => setActiveTab("orders")} style={{ padding: "8px 16px", background: activeTab === "orders" ? "var(--navy)" : "#eee", color: activeTab === "orders" ? "#fff" : "#333", border: "none", cursor: "pointer", borderRadius: "4px", fontWeight: "bold" }}>Orders ({orders.length})</button>
+        <button onClick={() => setActiveTab("users")} style={{ padding: "8px 16px", background: activeTab === "users" ? "var(--navy)" : "#eee", color: activeTab === "users" ? "#fff" : "#333", border: "none", cursor: "pointer", borderRadius: "4px", fontWeight: "bold" }}>Customers ({totalUsers})</button>
+      </div>
 
-        <div style={{ padding: "20px", background: "#fff", border: "1px solid #eee6d8", borderRadius: "8px", borderLeft: "4px solid #c9b18d", boxShadow: "0 2px 8px rgba(0,0,0,0.02)" }}>
-          <div style={{ fontSize: "12px", color: "var(--muted)", textTransform: "uppercase", letterSpacing: "1px", marginBottom: "8px" }}>Top Selling Scent</div>
-          <div style={{ fontSize: "20px", fontWeight: "bold", color: "var(--navy)", lineHeight: "1.2", marginTop: "4px" }}>{topSellingScent}</div>
-          {maxSold > 0 && <div style={{ fontSize: "12px", color: "var(--muted)", marginTop: "8px" }}>{maxSold} units sold</div>}
+      {/* 1. WRAPPER FOR ANALYTICS */}
+      <div style={{ display: activeTab === "analytics" ? "block" : "none" }}>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: "20px", marginBottom: "40px" }}>
+          <div style={{ padding: "20px", background: "#fff", border: "1px solid #eee6d8", borderRadius: "8px", borderLeft: "4px solid var(--navy)", boxShadow: "0 2px 8px rgba(0,0,0,0.02)" }}>
+            <div style={{ fontSize: "12px", color: "var(--muted)", textTransform: "uppercase", letterSpacing: "1px", marginBottom: "8px" }}>Total Revenue</div>
+            <div style={{ fontSize: "28px", fontWeight: "bold", color: "var(--navy)" }}>₹{totalRevenue.toLocaleString()}</div>
+          </div>
+          <div style={{ padding: "20px", background: "#fff", border: "1px solid #eee6d8", borderRadius: "8px", borderLeft: "4px solid #b76e79", boxShadow: "0 2px 8px rgba(0,0,0,0.02)" }}>
+            <div style={{ fontSize: "12px", color: "var(--muted)", textTransform: "uppercase", letterSpacing: "1px", marginBottom: "8px" }}>Orders This Month</div>
+            <div style={{ fontSize: "28px", fontWeight: "bold", color: "var(--navy)" }}>{ordersThisMonth}</div>
+          </div>
+          <div style={{ padding: "20px", background: "#fff", border: "1px solid #eee6d8", borderRadius: "8px", borderLeft: "4px solid #c9b18d", boxShadow: "0 2px 8px rgba(0,0,0,0.02)" }}>
+            <div style={{ fontSize: "12px", color: "var(--muted)", textTransform: "uppercase", letterSpacing: "1px", marginBottom: "8px" }}>Top Selling Scent</div>
+            <div style={{ fontSize: "20px", fontWeight: "bold", color: "var(--navy)", lineHeight: "1.2", marginTop: "4px" }}>{topSellingScent}</div>
+            {maxSold > 0 && <div style={{ fontSize: "12px", color: "var(--muted)", marginTop: "8px" }}>{maxSold} units sold</div>}
+          </div>
         </div>
       </div>
-      
-      {/* INVENTORY MANAGEMENT SECTION */}
-      <h3 style={legalSubHeadingStyle}>Live Inventory</h3>
-      <div style={{ display: "flex", flexDirection: "column", gap: "15px", marginBottom: "50px" }}>
-        {adminProducts.map(product => (
-          <div key={product.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", border: "1px solid #eee6d8", padding: "15px", background: "#fbf9f5" }}>
-            <div style={{ display: "flex", alignItems: "center", gap: "15px" }}>
-              <img src={product.image} alt={product.name} style={{ width: "50px", height: "50px", objectFit: "cover", borderRadius: "4px" }} />
-              <div>
-                <strong style={{ display: "block", color: "var(--navy)" }}>{product.name}</strong>
-                <span style={{ fontSize: "13px", color: "var(--muted)" }}>₹{product.price}</span>
+
+      {/* 2. WRAPPER FOR INVENTORY */}
+      <div style={{ display: activeTab === "inventory" ? "block" : "none" }}>
+        <div style={{ display: "flex", flexDirection: "column", gap: "15px", marginBottom: "50px" }}>
+          {adminProducts.map(product => (
+            <div key={product.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", border: "1px solid #eee6d8", padding: "15px", background: "#fbf9f5" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: "15px" }}>
+                <img src={product.image} alt={product.name} style={{ width: "50px", height: "50px", objectFit: "cover", borderRadius: "4px" }} />
+                <div>
+                  <strong style={{ display: "block", color: "var(--navy)" }}>{product.name}</strong>
+                  <span style={{ fontSize: "13px", color: "var(--muted)" }}>₹{product.price}</span>
+                </div>
+              </div>
+              <div style={{ display: "flex", gap: "10px" }}>
+                <button onClick={() => changePrice(product.id, product.price)} style={{ padding: "8px 12px", fontSize: "12px", background: "none", border: "1px solid var(--border)", cursor: "pointer" }}>EDIT PRICE</button>
+                <button onClick={() => toggleStock(product.id, product.outOfStock)} style={{ padding: "8px 12px", fontSize: "12px", background: product.outOfStock ? "#b76e79" : "var(--navy)", color: "#fff", border: "none", cursor: "pointer" }}>
+                  {product.outOfStock ? "MARK IN-STOCK" : "MARK OUT-OF-STOCK"}
+                </button>
               </div>
             </div>
-            
-            <div style={{ display: "flex", gap: "10px" }}>
-              <button 
-                onClick={() => changePrice(product.id, product.price)}
-                style={{ padding: "8px 12px", fontSize: "12px", background: "none", border: "1px solid var(--border)", cursor: "pointer" }}
-              >
-                EDIT PRICE
-              </button>
-              <button 
-                onClick={() => toggleStock(product.id, product.outOfStock)}
-                style={{ padding: "8px 12px", fontSize: "12px", background: product.outOfStock ? "#b76e79" : "var(--navy)", color: "#fff", border: "none", cursor: "pointer" }}
-              >
-                {product.outOfStock ? "MARK IN-STOCK" : "MARK OUT-OF-STOCK"}
-              </button>
-            </div>
-          </div>
-        ))}
+          ))}
+        </div>
       </div>
 
-      {/* Admin Navigation Tabs */}
-      <div style={{ display: "flex", gap: "10px", margin: "20px 0" }}>
-        <button 
-          onClick={() => setActiveTab("orders")}
-          style={{ padding: "8px 16px", background: activeTab === "orders" ? "var(--navy)" : "#eee", color: activeTab === "orders" ? "#fff" : "#333", border: "none", cursor: "pointer", borderRadius: "4px", fontWeight: "bold" }}>
-          Orders ({orders.length})
-        </button>
-        <button 
-          onClick={() => setActiveTab("users")}
-          style={{ padding: "8px 16px", background: activeTab === "users" ? "var(--navy)" : "#eee", color: activeTab === "users" ? "#fff" : "#333", border: "none", cursor: "pointer", borderRadius: "4px", fontWeight: "bold" }}>
-          Registered Customers ({totalUsers})
-        </button>
-      </div>
-
-      {/* WRAPPER FOR ORDERS - ONLY SHOWS WHEN ACTIVE TAB IS 'ORDERS' */}
+      {/* 3. WRAPPER FOR ORDERS */}
       <div style={{ display: activeTab === "orders" ? "block" : "none" }}>
 
       {/* ORDERS SECTION */}
