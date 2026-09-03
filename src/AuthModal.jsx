@@ -3,6 +3,9 @@ import { useState } from "react";
 export default function AuthModal({ isOpen, onClose, setLoggedInUser, setWishlist, setCartItems }) {
   const [isSignUp, setIsSignUp] = useState(false);
   const [formData, setFormData] = useState({ name: "", email: "", password: "" });
+  const [showPassword, setShowPassword] = useState(false);
+  const [isForgotPassword, setIsForgotPassword] = useState(false);
+  const [resetEmail, setResetEmail] = useState("");
   const [error, setError] = useState("");
 
   if (!isOpen) return null;
@@ -49,35 +52,97 @@ export default function AuthModal({ isOpen, onClose, setLoggedInUser, setWishlis
     }
   };
 
-  return (
+return (
     <div style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, backgroundColor: "rgba(0,0,0,0.7)", display: "flex", justifyContent: "center", alignItems: "center", zIndex: 1000 }}>
       <div style={{ backgroundColor: "#1a1a1a", padding: "30px", borderRadius: "8px", width: "90%", maxWidth: "400px", color: "#fff", position: "relative" }}>
         <button onClick={onClose} style={{ position: "absolute", top: "10px", right: "15px", background: "none", border: "none", color: "#fff", fontSize: "20px", cursor: "pointer" }}>✕</button>
         
-        <h2 style={{ textAlign: "center", marginBottom: "20px", fontFamily: "serif" }}>
-          {isSignUp ? "Create Account" : "Welcome Back"}
-        </h2>
-        
-        {error && <p style={{ color: "#ff4444", textAlign: "center", fontSize: "14px" }}>{error}</p>}
+        {/* CONDITIONAL RENDER: Forgot Password View vs Normal Login View */}
+        {isForgotPassword ? (
+          <div style={{ textAlign: "center", padding: "10px 0" }}>
+            <h2 style={{ marginBottom: "15px", fontFamily: "serif" }}>Reset Password</h2>
+            <p style={{ color: "#aaa", fontSize: "14px", marginBottom: "20px" }}>
+              Enter your email address and we will send you a link to reset your password.
+            </p>
+            <form onSubmit={(e) => { e.preventDefault(); alert("Backend route needed to send email!"); }} style={{ display: "flex", flexDirection: "column", gap: "15px" }}>
+              <input
+                type="email"
+                placeholder="Email Address"
+                value={resetEmail}
+                onChange={(e) => setResetEmail(e.target.value)}
+                style={{ width: "100%", padding: "10px", borderRadius: "4px", border: "1px solid #333", background: "#2a2a2a", color: "#fff", boxSizing: "border-box" }}
+                required
+              />
+              <button type="submit" style={{ padding: "12px", background: "#cfa968", color: "#000", border: "none", borderRadius: "4px", fontWeight: "bold", cursor: "pointer" }}>
+                SEND RESET CODE
+              </button>
+            </form>
+            <button 
+              onClick={() => setIsForgotPassword(false)} 
+              style={{ marginTop: "20px", background: "none", border: "none", color: "#aaa", fontSize: "13px", cursor: "pointer", textDecoration: "underline" }}
+            >
+              Back to Login
+            </button>
+          </div>
+        ) : (
+          <>
+            <h2 style={{ textAlign: "center", marginBottom: "20px", fontFamily: "serif" }}>
+              {isSignUp ? "Create Account" : "Welcome Back"}
+            </h2>
+            
+            {error && <p style={{ color: "#ff4444", textAlign: "center", fontSize: "14px" }}>{error}</p>}
 
-        <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: "15px" }}>
-          {isSignUp && (
-            <input type="text" placeholder="Full Name" required value={formData.name} onChange={(e) => setFormData({...formData, name: e.target.value})} style={{ padding: "10px", borderRadius: "4px", border: "1px solid #333", background: "#2a2a2a", color: "#fff" }} />
-          )}
-          <input type="email" placeholder="Email Address" required value={formData.email} onChange={(e) => setFormData({...formData, email: e.target.value})} style={{ padding: "10px", borderRadius: "4px", border: "1px solid #333", background: "#2a2a2a", color: "#fff" }} />
-          <input type="password" placeholder="Password" required value={formData.password} onChange={(e) => setFormData({...formData, password: e.target.value})} style={{ padding: "10px", borderRadius: "4px", border: "1px solid #333", background: "#2a2a2a", color: "#fff" }} />
-          
-          <button type="submit" style={{ padding: "12px", background: "#cfa968", color: "#000", border: "none", borderRadius: "4px", fontWeight: "bold", cursor: "pointer", marginTop: "10px" }}>
-            {isSignUp ? "Sign Up" : "Log In"}
-          </button>
-        </form>
+            <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: "15px" }}>
+              {isSignUp && (
+                <input type="text" placeholder="Full Name" required value={formData.name} onChange={(e) => setFormData({...formData, name: e.target.value})} style={{ padding: "10px", borderRadius: "4px", border: "1px solid #333", background: "#2a2a2a", color: "#fff" }} />
+              )}
+              <input type="email" placeholder="Email Address" required value={formData.email} onChange={(e) => setFormData({...formData, email: e.target.value})} style={{ padding: "10px", borderRadius: "4px", border: "1px solid #333", background: "#2a2a2a", color: "#fff" }} />
+              
+              {/* PASSWORD FIELD WITH EYE TOGGLE */}
+              <div style={{ position: "relative", width: "100%" }}>
+                <input 
+                  type={showPassword ? "text" : "password"} 
+                  placeholder="Password" 
+                  required 
+                  value={formData.password} 
+                  onChange={(e) => setFormData({...formData, password: e.target.value})} 
+                  style={{ width: "100%", padding: "10px", borderRadius: "4px", border: "1px solid #333", background: "#2a2a2a", color: "#fff", boxSizing: "border-box" }} 
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  style={{ position: "absolute", right: "10px", top: "50%", transform: "translateY(-50%)", background: "none", border: "none", cursor: "pointer", fontSize: "16px", color: "#aaa" }}
+                >
+                  {showPassword ? "👁️" : "👁️‍🗨️"}
+                </button>
+              </div>
 
-        <p style={{ textAlign: "center", marginTop: "20px", fontSize: "14px", color: "#aaa" }}>
-          {isSignUp ? "Already have an account? " : "Don't have an account? "}
-          <span onClick={() => setIsSignUp(!isSignUp)} style={{ color: "#cfa968", cursor: "pointer", textDecoration: "underline" }}>
-            {isSignUp ? "Log In" : "Sign Up"}
-          </span>
-        </p>
+              {/* FORGOT PASSWORD LINK */}
+              {!isSignUp && (
+                <div style={{ textAlign: "right", marginTop: "-5px" }}>
+                  <button 
+                    type="button" 
+                    onClick={() => setIsForgotPassword(true)} 
+                    style={{ background: "none", border: "none", color: "#cfa968", fontSize: "12px", cursor: "pointer", textDecoration: "underline", padding: 0 }}
+                  >
+                    Forgot Password?
+                  </button>
+                </div>
+              )}
+              
+              <button type="submit" style={{ padding: "12px", background: "#cfa968", color: "#000", border: "none", borderRadius: "4px", fontWeight: "bold", cursor: "pointer", marginTop: "5px" }}>
+                {isSignUp ? "Sign Up" : "Log In"}
+              </button>
+            </form>
+
+            <p style={{ textAlign: "center", marginTop: "20px", fontSize: "14px", color: "#aaa" }}>
+              {isSignUp ? "Already have an account? " : "Don't have an account? "}
+              <span onClick={() => setIsSignUp(!isSignUp)} style={{ color: "#cfa968", cursor: "pointer", textDecoration: "underline" }}>
+                {isSignUp ? "Log In" : "Sign Up"}
+              </span>
+            </p>
+          </>
+        )}
       </div>
     </div>
   );
