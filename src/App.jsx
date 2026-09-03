@@ -217,6 +217,15 @@ const syncCartToCloud = (updatedCart) => {
 
   const handlePaymentProceed = async (e) => {
     e.preventDefault();
+
+    // LOGIN GATE
+    const loggedInUser = localStorage.getItem("email");
+    if (!loggedInUser) {
+      alert("Please log in or create an account to complete your purchase.");
+      // setShowAuthModal(true); // Uncomment this if you want the login pop-up to open automatically
+      return; // This instantly stops the rest of the checkout code from running
+    }
+    
     const res = await loadRazorpayScript();
     if (!res) {
       alert("Razorpay SDK failed to load. Please check your internet connection.");
