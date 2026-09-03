@@ -66,6 +66,7 @@ const [cartItems, setCartItems] = useState(() => {
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [isAuthOpen, setIsAuthOpen] = useState(false);
 const [loggedInUser, setLoggedInUser] = useState(JSON.parse(localStorage.getItem("user")) || null);
+const [showLoginPrompt, setShowLoginPrompt] = useState(false);
 
 // AUTO-FILL CHECKOUT WHEN LOGGED IN
   useEffect(() => {
@@ -221,11 +222,10 @@ const syncCartToCloud = (updatedCart) => {
     // LOGIN GATE
     const loggedInUser = localStorage.getItem("email");
     if (!loggedInUser) {
-      alert("Please log in or create an account to complete your purchase.");
-      // setShowAuthModal(true); // Uncomment this if you want the login pop-up to open automatically
-      return; // This instantly stops the rest of the checkout code from running
+      setShowLoginPrompt(true); // Opens the sleek popup instead of the ugly browser alert
+      return; 
     }
-    
+
     const res = await loadRazorpayScript();
     if (!res) {
       alert("Razorpay SDK failed to load. Please check your internet connection.");
@@ -693,6 +693,36 @@ const syncCartToCloud = (updatedCart) => {
         ✓ {toastMessage}
       </div>
 
+        {/* LOGIN PROMPT POPUP */}
+      {showLoginPrompt && (
+        <div style={{ position: "fixed", top: 0, left: 0, width: "100%", height: "100%", backgroundColor: "rgba(0, 0, 0, 0.6)", zIndex: 9999, display: "flex", justifyContent: "center", alignItems: "center" }}>
+          <div style={{ background: "#fbf9f5", padding: "40px 30px", borderRadius: "8px", textAlign: "center", maxWidth: "400px", width: "90%", boxShadow: "0 10px 25px rgba(0,0,0,0.2)" }}>
+            <h3 style={{ margin: "0 0 15px 0", color: "var(--navy)", fontSize: "22px", fontFamily: "serif" }}>Almost there!</h3>
+            <p style={{ color: "var(--muted)", fontSize: "15px", marginBottom: "30px", lineHeight: "1.5" }}>
+              Please log in or create an account with House of A&R to complete your purchase and track your order.
+            </p>
+            <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+              <button 
+                onClick={() => {
+                  setShowLoginPrompt(false); // Close this prompt
+                  setIsCartOpen(false);      // Close the cart
+                  setShowAuthModal(true);    // Open your actual login screen
+                }}
+                style={{ padding: "14px", background: "var(--navy)", color: "#fff", border: "none", borderRadius: "4px", fontWeight: "bold", cursor: "pointer", letterSpacing: "1px" }}
+              >
+                LOGIN / REGISTER
+              </button>
+              <button 
+                onClick={() => setShowLoginPrompt(false)}
+                style={{ padding: "14px", background: "transparent", color: "var(--muted)", border: "none", cursor: "pointer", fontSize: "14px", textDecoration: "underline" }}
+              >
+                Continue Shopping
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+      
     </div>
   );
 }
