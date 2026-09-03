@@ -706,7 +706,7 @@ const syncCartToCloud = (updatedCart) => {
                 onClick={() => {
                   setShowLoginPrompt(false); // Close this prompt
                   setIsCartOpen(false);      // Close the cart
-                  setShowAuthModal(true);    // Open your actual login screen
+                  setIsAuthOpen(true);    // Open your actual login screen
                 }}
                 style={{ padding: "14px", background: "var(--navy)", color: "#fff", border: "none", borderRadius: "4px", fontWeight: "bold", cursor: "pointer", letterSpacing: "1px" }}
               >
@@ -722,7 +722,7 @@ const syncCartToCloud = (updatedCart) => {
           </div>
         </div>
       )}
-      
+
     </div>
   );
 }
