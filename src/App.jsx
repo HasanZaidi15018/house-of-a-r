@@ -491,6 +491,8 @@ const pageProps = {
           <Route path="/terms" element={<TermsPage />} />
           <Route path="/my-orders" element={<MyOrders />} />
           <Route path="/admin" element={<AdminPage />} />
+          <Route path="/" element={<HomePage products={products} wishlist={wishlist} toggleWishlist={toggleWishlist} addToCart={addToCart} openProduct={openProduct} cartItems={cartItems} updateCartQuantity={updateCartQuantity} />} />
+          <Route path="/shop" element={<ShopPage products={products} wishlist={wishlist} toggleWishlist={toggleWishlist} addToCart={addToCart} openProduct={openProduct} cartItems={cartItems} updateCartQuantity={updateCartQuantity} />} />
         </Routes>
       </main>
 
