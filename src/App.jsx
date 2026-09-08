@@ -278,14 +278,14 @@ const handlePaymentProceed = async (e) => {
         image: "/images/logo.png",
         order_id: orderData.id,  
         
-          notes: {
+notes: {
           order_details: cartItems.map(item => `${item.quantity}x ${item.name}`).join(", "),
-          customer_name: "Customer Name", // Replace with your actual state variable
-          phone: "Customer Phone",       // Replace with your actual state variable
-          address: "Customer Address",   // Replace with your actual state variable
-          pincode: "Customer Pincode"    // Replace with your actual state variable
+          customer_name: checkoutData.name,
+          phone: checkoutData.phone,
+          address: checkoutData.address,
+          pincode: checkoutData.pincode
         },
-
+        
         handler: async function (response) {
           try {
             await fetch("https://house-of-ar-backend.onrender.com/confirm-order", {
