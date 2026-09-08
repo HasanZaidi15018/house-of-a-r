@@ -1475,8 +1475,8 @@ function MyOrders() {
 function ProductCard({ product, toggleWishlist, wishlist, addToCart, openProduct, cartItems, updateCartQuantity }) {
   const [imgLoaded, setImgLoaded] = useState(false);
 
-  // Check if this specific product is already in the cart
-  const cartItem = cartItems.find((item) => item.id === product.id);
+// Safely check cart items
+  const cartItem = cartItems ? cartItems.find((item) => item.id === product.id) : null;
 
   return (
     <article className="product-card" onClick={() => openProduct(product)}>
