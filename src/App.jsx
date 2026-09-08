@@ -216,9 +216,6 @@ const syncCartToCloud = (updatedCart) => {
   const cartSubtotal = cartItems.reduce((total, item) => total + ((item.price || 399) * item.quantity), 0);
   const cartTotal = cartItems.length > 0 ? cartSubtotal + deliveryCharges : 0;
 
-  const handlePaymentProceed = async (e) => {
-    e.preventDefault();
-
     // LOGIN GATE
 const handlePaymentProceed = async (e) => {
     e.preventDefault();
