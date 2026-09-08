@@ -1474,8 +1474,6 @@ function MyOrders() {
 ========================================================= */
 function ProductCard({ product, toggleWishlist, wishlist, addToCart, openProduct, cartItems, updateCartQuantity }) {
   const [imgLoaded, setImgLoaded] = useState(false);
-
-  // Safely find if item exists in cart
   const cartItem = cartItems ? cartItems.find((item) => item.id === product.id) : null;
 
   return (
@@ -1498,11 +1496,20 @@ function ProductCard({ product, toggleWishlist, wishlist, addToCart, openProduct
         >
           <HeartIcon filled={wishlist.includes(product.id)} />
         </button>
+      </div>
 
-        {/* STOP PROPAGATION SO CLICKING BUTTONS DOESN'T OPEN MODAL */}
-        <div className="product-hover" onClick={(e) => e.stopPropagation()}>
+      <div className="product-info">
+        <h3>{product.name}</h3>
+        <p>{product.subtitle}</p>
+        <div className="price">
+          <span className="old-price">₹{product.oldPrice || 799}</span>
+          <span className="sale-price">₹{product.price || 399}</span>
+        </div>
+
+        {/* PERMANENT INTERACTIVE CONTROLS ON THE CARD */}
+        <div style={{ marginTop: "12px" }} onClick={(e) => e.stopPropagation()}>
           {product.outOfStock ? (
-            <button className="quick-add out-of-stock-btn" disabled>
+            <button className="checkout-button" disabled style={{ width: "100%", padding: "10px", background: "#ccc", cursor: "not-allowed" }}>
               OUT OF STOCK
             </button>
           ) : cartItem ? (
@@ -1512,15 +1519,11 @@ function ProductCard({ product, toggleWishlist, wishlist, addToCart, openProduct
               <button onClick={() => updateCartQuantity(product.id, 1)} style={{ background: "none", border: "none", color: "#fff", fontSize: "18px", cursor: "pointer", padding: "0 10px" }}>+</button>
             </div>
           ) : (
-            <button className="quick-add" onClick={() => addToCart(product)}>
-              ADD TO CART <span>+</span>
+            <button className="checkout-button" onClick={() => addToCart(product)} style={{ width: "100%", padding: "12px", background: "var(--navy)", color: "#fff", border: "none", borderRadius: "4px", fontWeight: "bold", cursor: "pointer", letterSpacing: "1px" }}>
+              ADD TO CART +
             </button>
           )}
         </div>
-      </div>
-      <div className="product-info">
-        <h3>{product.name}</h3><p>{product.subtitle}</p>
-        <div className="price"><span className="old-price">₹{product.oldPrice || 799}</span><span className="sale-price">₹{product.price || 399}</span></div>
       </div>
     </article>
   );
