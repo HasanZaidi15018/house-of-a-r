@@ -1475,7 +1475,7 @@ function MyOrders() {
 function ProductCard({ product, toggleWishlist, wishlist, addToCart, openProduct, cartItems, updateCartQuantity }) {
   const [imgLoaded, setImgLoaded] = useState(false);
 
-// Safely check cart items
+  // Safely find if item exists in cart
   const cartItem = cartItems ? cartItems.find((item) => item.id === product.id) : null;
 
   return (
@@ -1499,20 +1499,19 @@ function ProductCard({ product, toggleWishlist, wishlist, addToCart, openProduct
           <HeartIcon filled={wishlist.includes(product.id)} />
         </button>
 
+        {/* STOP PROPAGATION SO CLICKING BUTTONS DOESN'T OPEN MODAL */}
         <div className="product-hover" onClick={(e) => e.stopPropagation()}>
           {product.outOfStock ? (
             <button className="quick-add out-of-stock-btn" disabled>
               OUT OF STOCK
             </button>
           ) : cartItem ? (
-            // IF ALREADY IN CART: SHOW QUANTITY SELECTOR (+ / -)
-            <div className="quantity-selector" style={{ background: "#102943", color: "#fff", padding: "8px 15px", borderRadius: "4px", display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%" }}>
-              <button onClick={() => updateCartQuantity(product.id, -1)} style={{ background: "none", border: "none", color: "#fff", fontSize: "16px", cursor: "pointer" }}>−</button>
-              <span style={{ fontWeight: "bold" }}>{cartItem.quantity} in cart</span>
-              <button onClick={() => updateCartQuantity(product.id, 1)} style={{ background: "none", border: "none", color: "#fff", fontSize: "16px", cursor: "pointer" }}>+</button>
+            <div style={{ background: "#102943", color: "#fff", padding: "10px 15px", borderRadius: "4px", display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%" }}>
+              <button onClick={() => updateCartQuantity(product.id, -1)} style={{ background: "none", border: "none", color: "#fff", fontSize: "18px", cursor: "pointer", padding: "0 10px" }}>−</button>
+              <span style={{ fontWeight: "bold", fontSize: "13px", letterSpacing: "1px" }}>{cartItem.quantity} IN CART</span>
+              <button onClick={() => updateCartQuantity(product.id, 1)} style={{ background: "none", border: "none", color: "#fff", fontSize: "18px", cursor: "pointer", padding: "0 10px" }}>+</button>
             </div>
           ) : (
-            // IF NOT IN CART: SHOW ADD TO CART BUTTON
             <button className="quick-add" onClick={() => addToCart(product)}>
               ADD TO CART <span>+</span>
             </button>
