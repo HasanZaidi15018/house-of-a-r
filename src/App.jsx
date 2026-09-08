@@ -563,7 +563,13 @@ const pageProps = {
         key={p.id} 
         onClick={() => { openProduct(p); setIsSearchOpen(false); setSearchQuery(""); }}
       >
-        <img src={p.image} alt={p.name} style={{ width: "100%", height: "180px", objectFit: "cover", borderRadius: "4px" }} />
+        <div style={{ width: "100%", height: "160px", overflow: "hidden", borderRadius: "4px", marginBottom: "10px" }}>
+          <img 
+            src={p.image} 
+            alt={p.name} 
+            style={{ width: "100%", height: "100%", objectFit: "contain", background: "#fbf9f5" }} 
+          />
+        </div>
         <h4>{p.name}</h4>
         <p>{p.subtitle}</p>
       </button>
