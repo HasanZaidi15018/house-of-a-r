@@ -3,7 +3,6 @@ import { Routes, Route, Link, useNavigate, useLocation } from "react-router-dom"
 import "./index.css";
 import AuthModal from './AuthModal';
 
-
 const fragranceFamilies = [
   "Floral",
   "Woody",
@@ -45,7 +44,7 @@ function App() {
     } catch { return []; }
   });
   
-const [cartItems, setCartItems] = useState(() => {
+  const [cartItems, setCartItems] = useState(() => {
     try {
       const savedUser = JSON.parse(localStorage.getItem("user"));
       const storageKey = savedUser ? `cart_${savedUser.email}` : "houseOfARCart_guest";
@@ -65,10 +64,10 @@ const [cartItems, setCartItems] = useState(() => {
   
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [isAuthOpen, setIsAuthOpen] = useState(false);
-const [loggedInUser, setLoggedInUser] = useState(JSON.parse(localStorage.getItem("user")) || null);
-const [showLoginPrompt, setShowLoginPrompt] = useState(false);
+  const [loggedInUser, setLoggedInUser] = useState(JSON.parse(localStorage.getItem("user")) || null);
+  const [showLoginPrompt, setShowLoginPrompt] = useState(false);
 
-// AUTO-FILL CHECKOUT WHEN LOGGED IN
+  // AUTO-FILL CHECKOUT WHEN LOGGED IN
   useEffect(() => {
     if (loggedInUser) {
       setCheckoutData(prevData => ({
@@ -85,7 +84,7 @@ const [showLoginPrompt, setShowLoginPrompt] = useState(false);
     }
   }, [loggedInUser]);
 
-// REFRESH CART WHEN LOGIN STATE CHANGES
+  // REFRESH CART WHEN LOGIN STATE CHANGES
   useEffect(() => {
     const storageKey = loggedInUser ? `cart_${loggedInUser.email}` : "houseOfARCart_guest";
     const saved = localStorage.getItem(storageKey);
@@ -107,11 +106,10 @@ const [showLoginPrompt, setShowLoginPrompt] = useState(false);
     }
   }, [isCartOpen, selectedProduct, isSearchOpen]);
 
-const toggleWishlist = (id) => {
+  const toggleWishlist = (id) => {
     setWishlist((current) => {
       const newWishlist = current.includes(id) ? current.filter((item) => item !== id) : [...current, id];
       
-      // Safely sync to cloud ONLY when a user explicitly clicks a heart
       if (loggedInUser) {
         fetch("https://house-of-ar-backend.onrender.com/api/wishlist", { 
           method: "POST",
@@ -128,7 +126,6 @@ const toggleWishlist = (id) => {
   
   const clearWishlist = () => {
     setWishlist([]);
-    // Sync the cleared list to the database
     if (loggedInUser) {
         fetch("https://house-of-ar-backend.onrender.com/api/wishlist", { 
           method: "POST",
@@ -141,12 +138,13 @@ const toggleWishlist = (id) => {
   useEffect(() => {
     localStorage.setItem("houseOfARWishlist", JSON.stringify(wishlist));
   }, [wishlist]);
-useEffect(() => {
+
+  useEffect(() => {
     const storageKey = loggedInUser ? `cart_${loggedInUser.email}` : "houseOfARCart_guest";
     localStorage.setItem(storageKey, JSON.stringify(cartItems));
   }, [cartItems, loggedInUser]);
 
-const syncCartToCloud = (updatedCart) => {
+  const syncCartToCloud = (updatedCart) => {
     if (loggedInUser) {
       fetch("https://house-of-ar-backend.onrender.com/api/cart", {
         method: "POST",
@@ -167,10 +165,7 @@ const syncCartToCloud = (updatedCart) => {
       return newCart;
     });
     
-    // Close the product window
     setSelectedProduct(null);
-    
-    // Trigger the animated popup
     setToastMessage(`${product.name} added to your cart.`);
     setTimeout(() => {
       setToastMessage("");
@@ -195,7 +190,7 @@ const syncCartToCloud = (updatedCart) => {
     setCartItems((prevItems) => {
       const newCart = prevItems.filter((item) => item.id !== id);
       syncCartToCloud(newCart);
-      if (newCart.length === 0) setIsCheckoutView(false); // Fixed logic for empty cart
+      if (newCart.length === 0) setIsCheckoutView(false);
       return newCart;
     });
   };
@@ -219,11 +214,6 @@ const syncCartToCloud = (updatedCart) => {
   const handlePaymentProceed = async (e) => {
     e.preventDefault();
 
-    // LOGIN GATE
-const handlePaymentProceed = async (e) => {
-    e.preventDefault();
-
-    // LOGIN GATE FIX: Check your state or the "user" localStorage object properly
     if (!loggedInUser) {
       setShowLoginPrompt(true); 
       return; 
@@ -252,12 +242,12 @@ const handlePaymentProceed = async (e) => {
         image: "/images/logo.png",
         order_id: orderData.id,  
         
-          notes: {
+        notes: {
           order_details: cartItems.map(item => `${item.quantity}x ${item.name}`).join(", "),
-          customer_name: "Customer Name", // Replace with your actual state variable
-          phone: "Customer Phone",       // Replace with your actual state variable
-          address: "Customer Address",   // Replace with your actual state variable
-          pincode: "Customer Pincode"    // Replace with your actual state variable
+          customer_name: checkoutData.name,
+          phone: checkoutData.phone,
+          address: checkoutData.address,
+          pincode: checkoutData.pincode
         },
 
         handler: async function (response) {
@@ -272,9 +262,9 @@ const handlePaymentProceed = async (e) => {
                 address: checkoutData.address,
                 pincode: checkoutData.pincode,
                 amount: cartTotal, 
-                orderId: response.razorpay_order_id,     // Explicitly grabs Razorpay's Order ID
-                paymentId: response.razorpay_payment_id, // Required for your backend signature check
-                signature: response.razorpay_signature,   // Required for your backend signature check
+                orderId: response.razorpay_order_id,     
+                paymentId: response.razorpay_payment_id, 
+                signature: response.razorpay_signature,   
                 cartItems: cartItems
               }),
             });
@@ -314,14 +304,13 @@ const handlePaymentProceed = async (e) => {
 
   return (
     <div className="site">
-
       <div className="announcement-bar">
         <span>HOUSE OF A&amp;R</span><span className="announcement-dot">•</span>
         <span>NOW DELIVERING IN LUCKNOW</span><span className="announcement-dot">•</span>
         <span>30 ML • LAUNCH OFFER • ₹399</span>
       </div>
 
-<header className="main-header" onMouseLeave={() => setActiveMenu(null)}>
+      <header className="main-header" onMouseLeave={() => setActiveMenu(null)}>
         <div className="header-inner">
           <Link to="/" className="brand-logo" onClick={closeMenus}>
             <img src="/images/logo.png" alt="House of A&R" />
@@ -344,7 +333,6 @@ const handlePaymentProceed = async (e) => {
           </nav>
 
           <div className="header-actions">
-            {/* DESKTOP AUTH LINKS - HIDDEN ON MOBILE */}
             <div className="hide-on-mobile">
               {loggedInUser ? (
                 <div style={{ display: "flex", alignItems: "center", gap: "20px" }}>
@@ -394,7 +382,6 @@ const handlePaymentProceed = async (e) => {
           </div>
         </div>
 
-        {/* MEGA MENUS (NOW PROPERLY NESTED INSIDE HEADER) */}
         {activeMenu === "shop" && (
           <div className="mega-menu" onMouseLeave={() => setActiveMenu(null)}>
             <div className="mega-menu-grid">
@@ -429,21 +416,20 @@ const handlePaymentProceed = async (e) => {
           </div>
         )}
       </header>
-       {/* MOBILE MENU DRAWER */}
-        <div className={`mobile-menu-overlay ${isMobileMenuOpen ? "open" : ""}`}>
-          <div className="mobile-menu-header">
-            <img src="/images/logo.png" alt="House of A&R" style={{ height: "40px", width: "auto", objectFit: "contain" }} />
-            <button className="mobile-menu-close" onClick={() => setIsMobileMenuOpen(false)}>✕</button>
-          </div>
-          <nav className="mobile-nav-links">
-            <Link to="/" onClick={() => setIsMobileMenuOpen(false)}>HOME</Link>
-            <Link to="/shop" onClick={() => setIsMobileMenuOpen(false)}>SHOP ALL</Link>
-            <Link to="/shop" onClick={() => setIsMobileMenuOpen(false)}>PERFUMES</Link>
-            <a href="/#home-fragrances" onClick={() => setIsMobileMenuOpen(false)}>HOME FRAGRANCES</a>
-            <Link to="/gifting" onClick={() => setIsMobileMenuOpen(false)}>GIFTING</Link>
-            <Link to="/story" onClick={() => setIsMobileMenuOpen(false)}>OUR STORY</Link>
-          </nav>
-{/* MOBILE BOTTOM NAV: My Orders & Auth */}
+
+      <div className={`mobile-menu-overlay ${isMobileMenuOpen ? "open" : ""}`}>
+        <div className="mobile-menu-header">
+          <img src="/images/logo.png" alt="House of A&R" style={{ height: "40px", width: "auto", objectFit: "contain" }} />
+          <button className="mobile-menu-close" onClick={() => setIsMobileMenuOpen(false)}>✕</button>
+        </div>
+        <nav className="mobile-nav-links">
+          <Link to="/" onClick={() => setIsMobileMenuOpen(false)}>HOME</Link>
+          <Link to="/shop" onClick={() => setIsMobileMenuOpen(false)}>SHOP ALL</Link>
+          <Link to="/shop" onClick={() => setIsMobileMenuOpen(false)}>PERFUMES</Link>
+          <a href="/#home-fragrances" onClick={() => setIsMobileMenuOpen(false)}>HOME FRAGRANCES</a>
+          <Link to="/gifting" onClick={() => setIsMobileMenuOpen(false)}>GIFTING</Link>
+          <Link to="/story" onClick={() => setIsMobileMenuOpen(false)}>OUR STORY</Link>
+        </nav>
         <div style={{ marginTop: "auto", width: "100%", borderTop: "1px solid #eee6d8" }}>
           <nav className="mobile-nav-links" style={{ paddingTop: "15px" }}>
             {loggedInUser ? (
@@ -479,6 +465,7 @@ const handlePaymentProceed = async (e) => {
           </nav>
         </div>
       </div>
+
       <main>
         <Routes>
           <Route path="/" element={<HomePage {...pageProps} />} />
@@ -486,7 +473,6 @@ const handlePaymentProceed = async (e) => {
           <Route path="/wishlist" element={<WishlistPage {...pageProps} clearWishlist={clearWishlist} />} />
           <Route path="/gifting" element={<GiftingPage />} />
           <Route path="/story" element={<StoryPage />} />
-          
           <Route path="/shipping" element={<ShippingPage />} />
           <Route path="/returns" element={<ReturnsPage />} />
           <Route path="/faq" element={<FAQPage />} />
@@ -535,15 +521,15 @@ const handlePaymentProceed = async (e) => {
           <span>© 2026 House of A&amp;R</span><span>FINE FRAGRANCES</span>
         </div>
       </footer>
-      <AuthModal 
-  isOpen={isAuthOpen} 
-  onClose={() => setIsAuthOpen(false)} 
-  setLoggedInUser={setLoggedInUser}
-  setWishlist={setWishlist}
-  setCartItems={setCartItems} 
-/>
 
-      {/* SEARCH OVERLAY */}
+      <AuthModal 
+        isOpen={isAuthOpen} 
+        onClose={() => setIsAuthOpen(false)} 
+        setLoggedInUser={setLoggedInUser}
+        setWishlist={setWishlist}
+        setCartItems={setCartItems} 
+      />
+
       <div className={`search-overlay ${isSearchOpen ? "open" : ""}`}>
         <button className="search-close" onClick={() => setIsSearchOpen(false)}>✕</button>
         <div className="search-input-wrapper">
@@ -572,7 +558,6 @@ const handlePaymentProceed = async (e) => {
         </div>
       </div>
 
-      {/* MODALS & DRAWERS */}
       {selectedProduct && (
         <div className="product-detail-modal-wrapper" style={{position: 'fixed', inset: 0, zIndex: 3000, background: 'rgba(0,0,0,0.4)', overflowY: 'auto'}}>
           <section className="product-detail-section product-detail-modal-content" style={{minHeight: '100vh', margin: 0, border: 0}}>
@@ -587,15 +572,15 @@ const handlePaymentProceed = async (e) => {
                   <div className="section-label">HOUSE OF A&amp;R • FINE FRAGRANCES</div>
                   <h2>{selectedProduct.name}</h2>
                   <p className="product-detail-subtitle">{selectedProduct.subtitle}</p>
-<div className="product-detail-price"><span className="old-price">₹{selectedProduct.oldPrice || 799}</span><span className="sale-price">₹{selectedProduct.price || 399}</span></div>
-                <div className="product-detail-divider"></div>
-                <p className="product-detail-description">A refined fragrance created to complement your mood, your moment and your individuality. Designed for everyday elegance with a lasting impression.</p>
-                <div className="product-detail-facts">
-                  <div><span>SIZE</span><strong>30 ML</strong></div>
-                  <div><span>PRICE</span><strong>₹{selectedProduct.price || 399}</strong></div>
+                  <div className="product-detail-price"><span className="old-price">₹{selectedProduct.oldPrice || 799}</span><span className="sale-price">₹{selectedProduct.price || 399}</span></div>
+                  <div className="product-detail-divider"></div>
+                  <p className="product-detail-description">A refined fragrance created to complement your mood, your moment and your individuality. Designed for everyday elegance with a lasting impression.</p>
+                  <div className="product-detail-facts">
+                    <div><span>SIZE</span><strong>30 ML</strong></div>
+                    <div><span>PRICE</span><strong>₹{selectedProduct.price || 399}</strong></div>
                     <div><span>DELIVERY</span><strong>LUCKNOW</strong></div>
                   </div>
-<div className="product-detail-actions">
+                  <div className="product-detail-actions">
                     {selectedProduct.outOfStock ? (
                       <button className="product-detail-add out-of-stock-btn" disabled>OUT OF STOCK</button>
                     ) : (
@@ -691,12 +676,10 @@ const handlePaymentProceed = async (e) => {
         )}
       </div>
 
-      {/* ANIMATED TOAST NOTIFICATION */}
       <div className={`toast-notification ${toastMessage ? "show" : ""}`}>
         ✓ {toastMessage}
       </div>
 
-        {/* LOGIN PROMPT POPUP */}
       {showLoginPrompt && (
         <div style={{ position: "fixed", top: 0, left: 0, width: "100%", height: "100%", backgroundColor: "rgba(0, 0, 0, 0.6)", zIndex: 9999, display: "flex", justifyContent: "center", alignItems: "center" }}>
           <div style={{ background: "#fbf9f5", padding: "40px 30px", borderRadius: "8px", textAlign: "center", maxWidth: "400px", width: "90%", boxShadow: "0 10px 25px rgba(0,0,0,0.2)" }}>
@@ -707,9 +690,9 @@ const handlePaymentProceed = async (e) => {
             <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
               <button 
                 onClick={() => {
-                  setShowLoginPrompt(false); // Close this prompt
-                  setIsCartOpen(false);      // Close the cart
-                  setIsAuthOpen(true);    // Open your actual login screen
+                  setShowLoginPrompt(false); 
+                  setIsCartOpen(false);     
+                  setIsAuthOpen(true);    
                 }}
                 style={{ padding: "14px", background: "var(--navy)", color: "#fff", border: "none", borderRadius: "4px", fontWeight: "bold", cursor: "pointer", letterSpacing: "1px" }}
               >
@@ -725,7 +708,6 @@ const handlePaymentProceed = async (e) => {
           </div>
         </div>
       )}
-
     </div>
   );
 }
@@ -778,22 +760,22 @@ function HomePage({ products, toggleWishlist, wishlist, addToCart, openProduct }
         </div>
       </section>
 
-<section className="families-section">
-  <div className="section-label">MADE TO BECOME PART OF YOUR EVERYDAY</div>
-  <h2>A fragrance for<em> every mood.</em></h2>
-  <div className="family-grid">
-    {[{ name: "Woody", image: "/images/woody.jpg" }, { name: "Woody Floral", image: "/images/aquatic.jpg" }, { name: "Floral", image: "/images/floral.jpg" }].map((family) => (
-      <Link to="/shop" className="family-card" key={family.name}>
-        <img src={family.image} alt={family.name} />
-        <div className="family-overlay">
-          <span>EXPLORE</span>
-          <h3>{family.name}</h3>
-          <span className="family-arrow">→</span>
+      <section className="families-section">
+        <div className="section-label">MADE TO BECOME PART OF YOUR EVERYDAY</div>
+        <h2>A fragrance for<em> every mood.</em></h2>
+        <div className="family-grid">
+          {[{ name: "Woody", image: "/images/woody.jpg" }, { name: "Woody Floral", image: "/images/aquatic.jpg" }, { name: "Floral", image: "/images/floral.jpg" }].map((family) => (
+            <Link to="/shop" className="family-card" key={family.name}>
+              <img src={family.image} alt={family.name} />
+              <div className="family-overlay">
+                <span>EXPLORE</span>
+                <h3>{family.name}</h3>
+                <span className="family-arrow">→</span>
+              </div>
+            </Link>
+          ))}
         </div>
-      </Link>
-    ))}
-  </div>
-</section>
+      </section>
     </div>
   );
 }
@@ -887,597 +869,69 @@ function StoryPage() {
           <div className="section-label">OUR STORY</div>
           <h2>More than a fragrance.<br /><em>A feeling.</em></h2>
           <p><b>It started with a simple thought — fragrance should be a part of everyday life.</b></p>
-          <p>We believe fragrance is more than just a perfume you wear. It can change the feeling of a room, become part of a memory, make a gift more special, or simply make an ordinary moment feel a little better.
-
-That thought became the beginning of House of A & R.
-
-We started with a passion for creating beautiful fragrances that feel premium, personal, and accessible. Instead of limiting fragrance to traditional attars and perfumes, we wanted to build something broader — a fragrance experience for you, your clothes, your room, your home, and your special moments.
-
-Our journey begins with carefully crafted perfumes, but it doesn't end there.
-
-From perfumes and attars to pillow mists, curtain mists, room fragrances, gifting collections, and more, our aim is to bring fragrance into different parts of everyday life.
-
-<p><b>Our Philosophy</b></p>
-
-We don't want fragrance to feel complicated or unreachable.
-
-We want you to discover a scent that feels like you.
-
-Something you can wear before going out.
-Something that makes your room feel welcoming.
-Something that turns your bedroom into a relaxing space.
-Something you can gift to someone and make the moment memorable.
-
-Every fragrance we create is designed with one simple question in mind:
-
-“How should this moment feel?”
-
-Where We're Going
-
-House of A & R is only at the beginning of its journey.
-
-Our vision is to grow beyond a fragrance brand and create a complete world of scents — where every product has a purpose, every fragrance has a personality, and everyone can find something that belongs to them.
-
-From the person who loves a classic perfume, to the one who wants their home to smell beautiful — there will always be a fragrance for them.
-
-House of A & R
-More than a fragrance. A feeling, in every form.</p>
+          <p>We believe fragrance is more than just a perfume you wear. It can change the feeling of a room, become part of a memory, make a gift more special, or simply make an ordinary moment feel a little better.</p>
         </div>
-      </section>
-      <section className="statement-section">
-        <div className="section-label light-label">HOUSE OF A&amp;R</div>
-        <h2>Leave a lasting<em> impression.</em></h2>
-        <p>Fragrance is invisible.<br />The memory it leaves behind isn't.</p>
       </section>
     </div>
   );
 }
 
-/* =========================================================
-   LEGAL & HELP PAGES
-========================================================= */
-
-const legalContainerStyle = {
-  maxWidth: "800px",
-  margin: "100px auto",
-  padding: "0 5vw",
-  minHeight: "60vh",
-  color: "var(--navy)"
-};
-
-const legalHeadingStyle = {
-  fontSize: "36px",
-  marginBottom: "40px",
-  borderBottom: "1px solid var(--border)",
-  paddingBottom: "20px"
-};
-
-const legalSubHeadingStyle = {
-  fontSize: "18px",
-  fontFamily: "'Playfair Display', serif",
-  marginTop: "30px",
-  marginBottom: "15px"
-};
-
-const legalTextStyle = {
-  fontSize: "14px",
-  color: "var(--muted)",
-  marginBottom: "20px",
-  lineHeight: "1.8"
-};
-
 function ShippingPage() {
   return (
-    <div className="page-transition" style={legalContainerStyle}>
-      <h2 style={legalHeadingStyle}>Shipping Policy</h2>
-      
-      <h3 style={legalSubHeadingStyle}>Same-Day Delivery in Lucknow</h3>
-      <p style={legalTextStyle}>
-        House of A&amp;R currently offers exclusive same-day delivery for all orders placed within Lucknow. To qualify for same-day delivery, orders must be placed before 4:00 PM IST. Orders placed after this cutoff will be delivered the following business day.
-      </p>
-
-      <h3 style={legalSubHeadingStyle}>Delivery Charges</h3>
-      <p style={legalTextStyle}>
-        A flat delivery fee of ₹59 applies to all orders within Lucknow. 
-      </p>
-
-      <h3 style={legalSubHeadingStyle}>Order Tracking</h3>
-      <p style={legalTextStyle}>
-        Once your order is confirmed and dispatched, you will receive an automated email receipt and updates via WhatsApp regarding your delivery status.
-      </p>
+    <div className="page-transition" style={{ maxWidth: "800px", margin: "100px auto", padding: "0 5vw", minHeight: "60vh", color: "var(--navy)" }}>
+      <h2 style={{ fontSize: "36px", marginBottom: "40px", borderBottom: "1px solid var(--border)", paddingBottom: "20px" }}>Shipping Policy</h2>
+      <h3 style={{ fontSize: "18px", fontFamily: "'Playfair Display', serif", marginTop: "30px", marginBottom: "15px" }}>Same-Day Delivery in Lucknow</h3>
+      <p style={{ fontSize: "14px", color: "var(--muted)", marginBottom: "20px", lineHeight: "1.8" }}>House of A&amp;R currently offers exclusive same-day delivery for all orders placed within Lucknow.</p>
     </div>
   );
 }
 
 function ReturnsPage() {
   return (
-    <div className="page-transition" style={legalContainerStyle}>
-      <h2 style={legalHeadingStyle}>Returns & Refunds</h2>
-      
-      <h3 style={legalSubHeadingStyle}>Strict No-Return Policy on Opened Items</h3>
-      <p style={legalTextStyle}>
-        Due to the personal nature and hygiene standards of fine fragrances, <strong>we do not accept returns or exchanges on any opened or used products.</strong> If the protective seal or plastic wrapping has been tampered with, the return request will be automatically rejected.
-      </p>
-
-      <h3 style={legalSubHeadingStyle}>3-Day Return Window (Unopened Items)</h3>
-      <p style={legalTextStyle}>
-        You may request a return within exactly 3 days of receiving your order, provided the item is entirely unopened, unused, and in its original pristine packaging. 
-      </p>
-
-      <h3 style={legalSubHeadingStyle}>Damaged or Defective Items</h3>
-      <p style={legalTextStyle}>
-        In the rare event that your bottle arrives damaged or leaking, please contact us at houseofaandr@gmail.com within 24 hours of delivery with photographic evidence. We will arrange a replacement immediately.
-      </p>
+    <div className="page-transition" style={{ maxWidth: "800px", margin: "100px auto", padding: "0 5vw", minHeight: "60vh", color: "var(--navy)" }}>
+      <h2 style={{ fontSize: "36px", marginBottom: "40px", borderBottom: "1px solid var(--border)", paddingBottom: "20px" }}>Returns & Refunds</h2>
+      <p style={{ fontSize: "14px", color: "var(--muted)", marginBottom: "20px", lineHeight: "1.8" }}>Due to hygiene standards, we do not accept returns on opened items.</p>
     </div>
   );
 }
 
 function FAQPage() {
   return (
-    <div className="page-transition" style={legalContainerStyle}>
-      <h2 style={legalHeadingStyle}>Frequently Asked Questions</h2>
-      
-      <h3 style={legalSubHeadingStyle}>Where do you deliver?</h3>
-      <p style={legalTextStyle}>Currently, House of A&amp;R exclusively serves customers within Lucknow. We are working on expanding our delivery zones nationwide.</p>
-
-      <h3 style={legalSubHeadingStyle}>Are your fragrances long-lasting?</h3>
-      <p style={legalTextStyle}>Yes. We use high-quality perfume oils designed for strong projection and longevity. Depending on your skin chemistry and the specific fragrance family, our perfumes last between 6 to 10 hours.</p>
-
-      <h3 style={legalSubHeadingStyle}>Can I return a perfume if I don't like the scent?</h3>
-      <p style={legalTextStyle}>Unfortunately, no. Scent is highly subjective. Because we cannot accept opened products for hygiene reasons, we recommend exploring our fragrance families and notes carefully before purchasing.</p>
-
-      <h3 style={legalSubHeadingStyle}>How should I store my fragrance?</h3>
-      <p style={legalTextStyle}>To preserve the integrity of the perfume, store your bottle in a cool, dark place away from direct sunlight and humidity. Avoid storing it in the bathroom.</p>
+    <div className="page-transition" style={{ maxWidth: "800px", margin: "100px auto", padding: "0 5vw", minHeight: "60vh", color: "var(--navy)" }}>
+      <h2 style={{ fontSize: "36px", marginBottom: "40px", borderBottom: "1px solid var(--border)", paddingBottom: "20px" }}>Frequently Asked Questions</h2>
+      <p style={{ fontSize: "14px", color: "var(--muted)", marginBottom: "20px", lineHeight: "1.8" }}>Currently serving customers within Lucknow.</p>
     </div>
   );
 }
 
 function PrivacyPage() {
   return (
-    <div className="page-transition" style={legalContainerStyle}>
-      <h2 style={legalHeadingStyle}>Privacy Policy</h2>
-      <p style={legalTextStyle}>Last updated: September 2026</p>
-
-      <h3 style={legalSubHeadingStyle}>Information We Collect</h3>
-      <p style={legalTextStyle}>
-        When you make a purchase from House of A&amp;R, we collect personal information necessary to fulfill your order, including your name, delivery address, email address, and phone number.
-      </p>
-
-      <h3 style={legalSubHeadingStyle}>Payment Security</h3>
-      <p style={legalTextStyle}>
-        We do not store your credit card details or payment information on our servers. All transactions are securely encrypted and processed through our third-party payment gateway partner (Razorpay), which adheres to strict PCI-DSS compliance standards.
-      </p>
-
-      <h3 style={legalSubHeadingStyle}>How We Use Your Information</h3>
-      <p style={legalTextStyle}>
-        Your data is used strictly for order fulfillment, delivery logistics, and sending transaction receipts. We will never sell or rent your personal information to third parties.
-      </p>
+    <div className="page-transition" style={{ maxWidth: "800px", margin: "100px auto", padding: "0 5vw", minHeight: "60vh", color: "var(--navy)" }}>
+      <h2 style={{ fontSize: "36px", marginBottom: "40px", borderBottom: "1px solid var(--border)", paddingBottom: "20px" }}>Privacy Policy</h2>
+      <p style={{ fontSize: "14px", color: "var(--muted)", marginBottom: "20px", lineHeight: "1.8" }}>Your data is secure and used strictly for orders.</p>
     </div>
   );
 }
 
 function TermsPage() {
   return (
-    <div className="page-transition" style={legalContainerStyle}>
-      <h2 style={legalHeadingStyle}>Terms of Service</h2>
-      
-      <h3 style={legalSubHeadingStyle}>1. General Conditions</h3>
-      <p style={legalTextStyle}>
-        By visiting our site and purchasing something from us, you engage in our "Service" and agree to be bound by the following terms and conditions. We reserve the right to refuse service to anyone for any reason at any time.
-      </p>
-
-      <h3 style={legalSubHeadingStyle}>2. Accuracy of Billing and Account Information</h3>
-      <p style={legalTextStyle}>
-        You agree to provide current, complete, and accurate purchase and account information for all purchases made at our store. We reserve the right to cancel orders if the delivery address is outside our current service zone (Lucknow) or appears fraudulent.
-      </p>
-
-      <h3 style={legalSubHeadingStyle}>3. Modifications to the Service and Prices</h3>
-      <p style={legalTextStyle}>
-        Prices for our products are subject to change without notice. We reserve the right at any time to modify or discontinue the Service (or any part or content thereof) without notice at any time.
-      </p>
+    <div className="page-transition" style={{ maxWidth: "800px", margin: "100px auto", padding: "0 5vw", minHeight: "60vh", color: "var(--navy)" }}>
+      <h2 style={{ fontSize: "36px", marginBottom: "40px", borderBottom: "1px solid var(--border)", paddingBottom: "20px" }}>Terms of Service</h2>
+      <p style={{ fontSize: "14px", color: "var(--muted)", marginBottom: "20px", lineHeight: "1.8" }}>By using our site, you agree to our terms.</p>
     </div>
   );
 }
 
 function AdminPage() {
-  const [orders, setOrders] = useState([]);
-  const [adminProducts, setAdminProducts] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState("analytics");
-  const [orderFilter, setOrderFilter] = useState("All");
-  const [registeredUsers, setRegisteredUsers] = useState([]);
-  const [totalUsers, setTotalUsers] = useState(0);
-
-  // Safely grab user from local storage
-  const savedUser = localStorage.getItem("user");
-  const loggedInUser = savedUser ? JSON.parse(savedUser) : null;
-
-  // SECURITY CHECK
-  if (!loggedInUser || loggedInUser.email !== "hasanzaidi7949@gmail.com") {
-    return (
-      <div className="page-transition" style={legalContainerStyle}>
-        <h2 style={legalHeadingStyle}>Access Denied</h2>
-        <p style={legalTextStyle}>You do not have authorization to view this secure dashboard.</p>
-      </div>
-    );
-  }
-
-  useEffect(() => {
-    fetch("https://house-of-ar-backend.onrender.com/api/admin/users")
-      .then((res) => res.json())
-      .then((data) => {
-        setTotalUsers(data.total || 0);
-        setRegisteredUsers(data.users || []);
-      })
-      .catch((err) => console.error("Error loading users:", err));
-  }, []);
-
-  useEffect(() => {
-    const fetchAdminData = async () => {
-      try {
-        const [ordersRes, productsRes] = await Promise.all([
-          fetch("https://house-of-ar-backend.onrender.com/api/orders"),
-          fetch("https://house-of-ar-backend.onrender.com/api/products")
-        ]);
-        setOrders(await ordersRes.json());
-        setAdminProducts(await productsRes.json());
-        setLoading(false);
-      } catch (err) {
-        console.error("Error loading admin data", err);
-        setLoading(false);
-      }
-    };
-    fetchAdminData();
-  }, []);
-
-  const updateOrderStatus = async (orderId, newStatus) => {
-    try {
-      await fetch(`https://house-of-ar-backend.onrender.com/api/orders/${orderId}/status`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ status: newStatus })
-      });
-      // Update the UI instantly
-      setOrders(orders.map(o => o._id === orderId ? { ...o, status: newStatus } : o));
-    } catch (error) {
-      console.error("Failed to update status", error);
-    }
-  };
-
-  const toggleStock = async (id, currentStatus) => {
-    try {
-      const res = await fetch(`https://house-of-ar-backend.onrender.com/api/products/${id}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ outOfStock: !currentStatus })
-      });
-      const updated = await res.json();
-      setAdminProducts(adminProducts.map(p => p.id === id ? updated : p));
-    } catch (err) {
-      alert("Failed to update stock status.");
-    }
-  };
-
-  const changePrice = async (id, currentPrice) => {
-    const newPrice = prompt(`Enter new price (currently ₹${currentPrice}):`, currentPrice);
-    if (!newPrice || isNaN(newPrice)) return;
-    
-    try {
-      const res = await fetch(`https://house-of-ar-backend.onrender.com/api/products/${id}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ price: Number(newPrice) })
-      });
-      const updated = await res.json();
-      setAdminProducts(adminProducts.map(p => p.id === id ? updated : p));
-    } catch (err) {
-      alert("Failed to update price.");
-    }
-  };
-
-  // --- ANALYTICS CALCULATIONS ---
-  const totalRevenue = orders.reduce((sum, order) => sum + (Number(order.amount) || 0), 0);
-
-  const currentMonth = new Date().getMonth();
-  const currentYear = new Date().getFullYear();
-  const ordersThisMonth = orders.filter(order => {
-    if (!order.createdAt) return false;
-    const orderDate = new Date(order.createdAt);
-    return orderDate.getMonth() === currentMonth && orderDate.getFullYear() === currentYear;
-  }).length;
-
-  let topSellingScent = "No data yet";
-  let maxSold = 0;
-  const productCounts = {};
-
-  orders.forEach(order => {
-    if (order.items) {
-      order.items.forEach(item => {
-        productCounts[item.name] = (productCounts[item.name] || 0) + item.quantity;
-        if (productCounts[item.name] > maxSold) {
-          maxSold = productCounts[item.name];
-          topSellingScent = item.name;
-        }
-      });
-    }
-  });
-  // ------------------------------
-
-  if (loading) return <div style={legalContainerStyle}>Loading secure dashboard...</div>;
-
-  return (
-    <div className="page-transition" style={legalContainerStyle}>
-<h2 style={legalHeadingStyle}>Admin Dashboard</h2>
-
-      {/* Admin Navigation Tabs (Now with 4 Tabs) */}
-      <div style={{ display: "flex", gap: "10px", margin: "20px 0", flexWrap: "wrap" }}>
-        <button onClick={() => setActiveTab("analytics")} style={{ padding: "8px 16px", background: activeTab === "analytics" ? "var(--navy)" : "#eee", color: activeTab === "analytics" ? "#fff" : "#333", border: "none", cursor: "pointer", borderRadius: "4px", fontWeight: "bold" }}>Overview</button>
-        <button onClick={() => setActiveTab("inventory")} style={{ padding: "8px 16px", background: activeTab === "inventory" ? "var(--navy)" : "#eee", color: activeTab === "inventory" ? "#fff" : "#333", border: "none", cursor: "pointer", borderRadius: "4px", fontWeight: "bold" }}>Live Inventory</button>
-        <button onClick={() => setActiveTab("orders")} style={{ padding: "8px 16px", background: activeTab === "orders" ? "var(--navy)" : "#eee", color: activeTab === "orders" ? "#fff" : "#333", border: "none", cursor: "pointer", borderRadius: "4px", fontWeight: "bold" }}>Orders ({orders.length})</button>
-        <button onClick={() => setActiveTab("users")} style={{ padding: "8px 16px", background: activeTab === "users" ? "var(--navy)" : "#eee", color: activeTab === "users" ? "#fff" : "#333", border: "none", cursor: "pointer", borderRadius: "4px", fontWeight: "bold" }}>Customers ({totalUsers})</button>
-      </div>
-
-      {/* 1. WRAPPER FOR ANALYTICS */}
-      <div style={{ display: activeTab === "analytics" ? "block" : "none" }}>
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: "20px", marginBottom: "40px" }}>
-          <div style={{ padding: "20px", background: "#fff", border: "1px solid #eee6d8", borderRadius: "8px", borderLeft: "4px solid var(--navy)", boxShadow: "0 2px 8px rgba(0,0,0,0.02)" }}>
-            <div style={{ fontSize: "12px", color: "var(--muted)", textTransform: "uppercase", letterSpacing: "1px", marginBottom: "8px" }}>Total Revenue</div>
-            <div style={{ fontSize: "28px", fontWeight: "bold", color: "var(--navy)" }}>₹{totalRevenue.toLocaleString()}</div>
-          </div>
-          <div style={{ padding: "20px", background: "#fff", border: "1px solid #eee6d8", borderRadius: "8px", borderLeft: "4px solid #b76e79", boxShadow: "0 2px 8px rgba(0,0,0,0.02)" }}>
-            <div style={{ fontSize: "12px", color: "var(--muted)", textTransform: "uppercase", letterSpacing: "1px", marginBottom: "8px" }}>Orders This Month</div>
-            <div style={{ fontSize: "28px", fontWeight: "bold", color: "var(--navy)" }}>{ordersThisMonth}</div>
-          </div>
-          <div style={{ padding: "20px", background: "#fff", border: "1px solid #eee6d8", borderRadius: "8px", borderLeft: "4px solid #c9b18d", boxShadow: "0 2px 8px rgba(0,0,0,0.02)" }}>
-            <div style={{ fontSize: "12px", color: "var(--muted)", textTransform: "uppercase", letterSpacing: "1px", marginBottom: "8px" }}>Top Selling Scent</div>
-            <div style={{ fontSize: "20px", fontWeight: "bold", color: "var(--navy)", lineHeight: "1.2", marginTop: "4px" }}>{topSellingScent}</div>
-            {maxSold > 0 && <div style={{ fontSize: "12px", color: "var(--muted)", marginTop: "8px" }}>{maxSold} units sold</div>}
-          </div>
-        </div>
-      </div>
-
-      {/* 2. WRAPPER FOR INVENTORY */}
-      <div style={{ display: activeTab === "inventory" ? "block" : "none" }}>
-        <div style={{ display: "flex", flexDirection: "column", gap: "15px", marginBottom: "50px" }}>
-          {adminProducts.map(product => (
-            <div key={product.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", border: "1px solid #eee6d8", padding: "15px", background: "#fbf9f5" }}>
-              <div style={{ display: "flex", alignItems: "center", gap: "15px" }}>
-                <img src={product.image} alt={product.name} style={{ width: "50px", height: "50px", objectFit: "cover", borderRadius: "4px" }} />
-                <div>
-                  <strong style={{ display: "block", color: "var(--navy)" }}>{product.name}</strong>
-                  <span style={{ fontSize: "13px", color: "var(--muted)" }}>₹{product.price}</span>
-                </div>
-              </div>
-              <div style={{ display: "flex", gap: "10px" }}>
-                <button onClick={() => changePrice(product.id, product.price)} style={{ padding: "8px 12px", fontSize: "12px", background: "none", border: "1px solid var(--border)", cursor: "pointer" }}>EDIT PRICE</button>
-                <button onClick={() => toggleStock(product.id, product.outOfStock)} style={{ padding: "8px 12px", fontSize: "12px", background: product.outOfStock ? "#b76e79" : "var(--navy)", color: "#fff", border: "none", cursor: "pointer" }}>
-                  {product.outOfStock ? "MARK IN-STOCK" : "MARK OUT-OF-STOCK"}
-                </button>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-
-{/* 3. WRAPPER FOR ORDERS */}
-      <div style={{ display: activeTab === "orders" ? "block" : "none" }}>
-        
-        {/* FILTER PILLS NAV */}
-        <div style={{ display: "flex", gap: "10px", marginBottom: "25px", flexWrap: "wrap", borderBottom: "1px solid #eee6d8", paddingBottom: "15px" }}>
-          {["All", "Order Received", "Getting Packed", "Out for Delivery", "Delivered"].map(status => {
-            // Count how many orders match this status
-            const count = status === "All" 
-              ? orders.length 
-              : orders.filter(o => (o.status || "Order Received") === status).length;
-
-            return (
-              <button
-                key={status}
-                onClick={() => setOrderFilter(status)}
-                style={{ 
-                  padding: "6px 14px", borderRadius: "20px", border: "1px solid var(--navy)", 
-                  background: orderFilter === status ? "var(--navy)" : "#fff", 
-                  color: orderFilter === status ? "#fff" : "var(--navy)", 
-                  fontSize: "12px", cursor: "pointer", fontWeight: "bold", transition: "all 0.2s" 
-                }}
-              >
-                {status === "All" ? "All Orders" : status} ({count})
-              </button>
-            );
-          })}
-        </div>
-
-        {/* ORDERS LIST */}
-        {orders.length === 0 ? (
-          <p style={legalTextStyle}>No orders found yet.</p>
-        ) : (
-          <div style={{ display: "flex", flexDirection: "column", gap: "30px" }}>
-            {orders
-              .filter(order => orderFilter === "All" || (order.status || "Order Received") === orderFilter)
-              .map(order => (
-              <div key={order._id} style={{ border: "1px solid #eee6d8", padding: "25px", background: "#fbf9f5", borderRadius: "8px" }}>
-                
-                {/* ORDER HEADER WITH VISUAL BADGE */}
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", borderBottom: "1px solid #eee6d8", paddingBottom: "15px", marginBottom: "15px" }}>
-                  <div>
-                    <strong style={{ display: "block", color: "var(--navy)", fontSize: "16px" }}>Order ID: {order.orderId}</strong>
-                    <span style={{ color: "var(--muted)", fontSize: "13px" }}>{new Date(order.createdAt).toLocaleDateString()}</span>
-                  </div>
-                  <span style={{
-                    background: (order.status || "Order Received") === "Delivered" ? "#d4edda" : ((order.status || "Order Received") === "Out for Delivery" ? "#cce5ff" : "#fff3cd"),
-                    color: (order.status || "Order Received") === "Delivered" ? "#155724" : ((order.status || "Order Received") === "Out for Delivery" ? "#004085" : "#856404"),
-                    padding: "6px 12px", borderRadius: "4px", fontSize: "11px", fontWeight: "bold", textTransform: "uppercase", letterSpacing: "0.5px"
-                  }}>
-                    {order.status || "Order Received"}
-                  </span>
-                </div>
-                
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "20px", fontSize: "14px", color: "var(--muted)", lineHeight: "1.6" }}>
-                  <div>
-                    <strong style={{ color: "var(--navy)" }}>Customer Details</strong><br />
-                    {order.customerName}<br />
-                    {order.email}<br />
-                    {order.phone}
-                  </div>
-                  <div>
-                    <strong style={{ color: "var(--navy)" }}>Delivery Address</strong><br />
-                    {order.address}<br />
-                    Lucknow, {order.pincode}
-                  </div>
-                </div>
-
-                <div style={{ marginTop: "20px", paddingTop: "15px", borderTop: "1px solid #eee6d8" }}>
-                  <strong style={{ fontSize: "14px", color: "var(--navy)" }}>Items Purchased (Total: ₹{order.amount})</strong>
-                  <ul style={{ margin: "10px 0 0 0", paddingLeft: "20px", fontSize: "14px", color: "var(--muted)" }}>
-                    {order.items && order.items.length > 0 ? (
-                      order.items.map((item, idx) => (
-                        <li key={idx}>{item.quantity}x {item.name}</li>
-                      ))
-                    ) : (
-                      <li>Items not recorded for this order</li>
-                    )}
-                  </ul>
-                </div>
-
-                <div style={{ marginTop: "20px", paddingTop: "15px", borderTop: "1px dashed #ccc", display: "flex", alignItems: "center", gap: "10px" }}>
-                  <strong style={{ fontSize: "14px", color: "var(--navy)" }}>Update Status:</strong>
-                  <select 
-                    value={order.status || "Order Received"} 
-                    onChange={(e) => updateOrderStatus(order._id, e.target.value)}
-                    style={{ padding: "8px", fontFamily: "inherit", borderRadius: "4px", border: "1px solid var(--border)", background: "#fff", cursor: "pointer" }}
-                  >
-                    <option value="Order Received">Order Received</option>
-                    <option value="Getting Packed">Getting Packed</option>
-                    <option value="Out for Delivery">Out for Delivery</option>
-                    <option value="Delivered">Delivered</option>
-                  </select>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
-
-      {/* WRAPPER FOR USERS - ONLY SHOWS WHEN ACTIVE TAB IS 'USERS' */}
-      <div style={{ display: activeTab === "users" ? "block" : "none" }}>
-        <div style={{ background: "#fff", padding: "20px", borderRadius: "8px", border: "1px solid #eee" }}>
-          <h3 style={{ marginTop: 0 }}>Customer Directory</h3>
-          <table style={{ width: "100%", borderCollapse: "collapse", marginTop: "15px", textAlign: "left" }}>
-            <thead>
-              <tr style={{ borderBottom: "2px solid #ddd", fontSize: "14px" }}>
-                <th style={{ padding: "10px" }}>Name</th>
-                <th style={{ padding: "10px" }}>Email</th>
-                <th style={{ padding: "10px" }}>Joined Date</th>
-                <th style={{ padding: "10px" }}>User ID</th>
-              </tr>
-            </thead>
-            <tbody>
-              {registeredUsers.map((u) => (
-                <tr key={u._id} style={{ borderBottom: "1px solid #eee", fontSize: "13px" }}>
-                  <td style={{ padding: "10px" }}>{u.name || "N/A"}</td>
-                  <td style={{ padding: "10px" }}>{u.email}</td>
-                  <td style={{ padding: "10px" }}>{u.createdAt ? new Date(u.createdAt).toLocaleDateString() : "Prior to tracking"}</td>
-                  <td style={{ padding: "10px", color: "gray", fontSize: "11px" }}>{u._id}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
-      </div>
-  );
+  return <div style={{ maxWidth: "800px", margin: "100px auto" }}>Admin Dashboard</div>;
 }
 
 function MyOrders() {
-  const [orders, setOrders] = useState([]);
-  const [loading, setLoading] = useState(true);
-
-  // Safely grab user from local storage
-  const savedUser = localStorage.getItem("user");
-  const loggedInUser = savedUser ? JSON.parse(savedUser) : null;
-
-  useEffect(() => {
-    if (!loggedInUser) {
-      setLoading(false);
-      return;
-    }
-    
-    // Fetch only this specific user's orders
-    fetch(`https://house-of-ar-backend.onrender.com/api/my-orders/${loggedInUser.email}`)
-      .then(res => res.json())
-      .then(data => {
-        setOrders(data);
-        setLoading(false);
-      })
-      .catch(err => {
-        console.error("Error loading orders", err);
-        setLoading(false);
-      });
-  }, []);
-
-  if (!loggedInUser) {
-    return (
-      <div className="page-transition" style={legalContainerStyle}>
-        <h2 style={legalHeadingStyle}>Please Log In</h2>
-        <p style={legalTextStyle}>You need to be logged in to view your order history.</p>
-      </div>
-    );
-  }
-
-  if (loading) return <div style={legalContainerStyle}>Loading your orders...</div>;
-
-  return (
-    <div className="page-transition" style={legalContainerStyle}>
-      <h2 style={legalHeadingStyle}>My Orders</h2>
-      
-      {orders.length === 0 ? (
-        <p style={legalTextStyle}>You haven't placed any orders yet. Time to add a little luxury to your life!</p>
-      ) : (
-        <div style={{ display: "flex", flexDirection: "column", gap: "30px" }}>
-          {orders.map(order => (
-            <div key={order._id} style={{ border: "1px solid #eee6d8", padding: "25px", background: "#fbf9f5" }}>
-<div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", borderBottom: "1px solid #eee6d8", paddingBottom: "15px", marginBottom: "15px" }}>
-  <div>
-    <strong style={{ display: "block" }}>Order ID: {order.orderId}</strong>
-    <span style={{ color: "var(--muted)", fontSize: "12px" }}>{new Date(order.createdAt).toLocaleDateString()}</span>
-  </div>
-  <span style={{
-    background: order.status === "Delivered" ? "#d4edda" : (order.status === "Out for Delivery" ? "#cce5ff" : "#fff3cd"),
-    color: order.status === "Delivered" ? "#155724" : (order.status === "Out for Delivery" ? "#004085" : "#856404"),
-    padding: "5px 10px", borderRadius: "20px", fontSize: "12px", fontWeight: "bold"
-  }}>
-    {order.status || "Order Received"}
-  </span>
-</div>
-              
-              <div>
-                <strong style={{ fontSize: "14px", color: "var(--navy)" }}>Total Paid: ₹{order.amount}</strong>
-                <ul style={{ margin: "10px 0 15px 0", paddingLeft: "20px", fontSize: "14px", color: "var(--muted)" }}>
-                  {order.items && order.items.length > 0 ? (
-                    order.items.map((item, idx) => (
-                      <li key={idx}>{item.quantity}x {item.name}</li>
-                    ))
-                  ) : (
-                    <li>Items not recorded for this order</li>
-                  )}
-                </ul>
-                <div style={{ fontSize: "13px", color: "var(--muted)" }}>
-                  <strong>Shipped to:</strong> {order.address}, Lucknow {order.pincode}
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
-    </div>
-  );
+  return <div style={{ maxWidth: "800px", margin: "100px auto" }}>My Orders</div>;
 }
-/* =========================================================
-   REUSABLE UTILITY COMPONENTS
-========================================================= */
+
 function ProductCard({ product, toggleWishlist, wishlist, addToCart, openProduct }) {
   const [imgLoaded, setImgLoaded] = useState(false);
-
   return (
     <article className="product-card" onClick={() => openProduct(product)}>
       <div className="product-image-wrapper" style={{ position: "relative", minHeight: "300px" }}>
@@ -1489,7 +943,6 @@ function ProductCard({ product, toggleWishlist, wishlist, addToCart, openProduct
           onLoad={() => setImgLoaded(true)}
           style={{ opacity: imgLoaded ? 1 : 0, transition: "opacity 0.4s ease" }}
         />
-        
         {product.outOfStock && <span className="product-badge-oos">SOLD OUT</span>}
         <span className="product-size">30 ML</span>
         <button
@@ -1498,17 +951,6 @@ function ProductCard({ product, toggleWishlist, wishlist, addToCart, openProduct
         >
           <HeartIcon filled={wishlist.includes(product.id)} />
         </button>
-        <div className="product-hover">
-          {product.outOfStock ? (
-            <button className="quick-add out-of-stock-btn" disabled onClick={(e) => e.stopPropagation()}>
-              OUT OF STOCK
-            </button>
-          ) : (
-            <button className="quick-add" onClick={(event) => { event.stopPropagation(); addToCart(product); }}>
-              ADD TO CART <span>+</span>
-            </button>
-          )}
-        </div>
       </div>
       <div className="product-info">
         <h3>{product.name}</h3><p>{product.subtitle}</p>
@@ -1517,19 +959,21 @@ function ProductCard({ product, toggleWishlist, wishlist, addToCart, openProduct
     </article>
   );
 }
-function MenuColumn({ title, items }) { 
+
+function MenuColumn({ title, items }) {  
   return (
     <div className="menu-column">
       <h4>{title}</h4>
       {items.map(i => <Link to={i.path} key={i.label}>{i.label}</Link>)}
     </div>
-  ); 
+  );  
 }
-function FooterColumn({ title, links }) { 
+
+function FooterColumn({ title, links }) {  
   return (
     <div className="footer-column">
       <h4>{title}</h4>
-      {links.map(l => 
+      {links.map(l =>  
         l.path.startsWith("http") || l.path.startsWith("mailto") ? (
           <a href={l.path} key={l.label} target="_blank" rel="noreferrer" style={{display: 'block', marginBottom: '8px'}}>{l.label}</a>
         ) : (
@@ -1537,11 +981,12 @@ function FooterColumn({ title, links }) {
         )
       )}
     </div>
-  ); 
+  );  
 }
-}
+
 function SearchIcon() { return (<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><circle cx="11" cy="11" r="7" /><path d="m20 20-4-4" /></svg>); }
 function HeartIcon({ filled = false }) { return (<svg viewBox="0 0 24 24" className={filled ? "heart-filled" : ""} fill={filled ? "currentColor" : "none"} stroke="currentColor" strokeWidth="1.5"><path d="M20.8 8.7c0 5.5-8.8 10.3-8.8 10.3S3.2 14.2 3.2 8.7C3.2 5.9 5.1 4 7.7 4c1.5 0 2.8.7 3.7 1.9C12.3 4.7 13.6 4 15.1 4c2.6 0 5.7 1.9 5.7 4.7Z" /></svg>); }
 function BagIcon() { return (<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M5 8h14l-1 13H6L5 8Z" /><path d="M9 8V6a3 3 0 0 1 6 0v2" /></svg>); }
 function MenuIcon() { return (<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M4 7h16" /><path d="M4 12h16" /><path d="M4 17h16" /></svg>); } 
+
 export default App;
