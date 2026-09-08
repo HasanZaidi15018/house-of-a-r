@@ -1107,10 +1107,11 @@ function AdminPage() {
   const [orders, setOrders] = useState([]);
   const [adminProducts, setAdminProducts] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [adminTab, setAdminTab] = useState("overview");
+  const [adminTab, setAdminTab] = useState("overview"); // Unified tab state
   const [orderFilter, setOrderFilter] = useState("All");
   const [registeredUsers, setRegisteredUsers] = useState([]);
   const [totalUsers, setTotalUsers] = useState(0);
+  const [analyticsData, setAnalyticsData] = useState({ totalVisits: 0, cartAdds: [], events: [] });
 
   // Safely grab user from local storage
   const savedUser = localStorage.getItem("user");
@@ -1126,6 +1127,7 @@ function AdminPage() {
     );
   }
 
+  // Fetch users
   useEffect(() => {
     fetch("https://house-of-ar-backend.onrender.com/api/admin/users")
       .then((res) => res.json())
@@ -1136,6 +1138,7 @@ function AdminPage() {
       .catch((err) => console.error("Error loading users:", err));
   }, []);
 
+  // Fetch orders and products
   useEffect(() => {
     const fetchAdminData = async () => {
       try {
@@ -1154,6 +1157,16 @@ function AdminPage() {
     fetchAdminData();
   }, []);
 
+  // Fetch analytics when insights tab is open
+  useEffect(() => {
+    if (adminTab === "insights") {
+      fetch("https://house-of-ar-backend.onrender.com/api/analytics")
+        .then((res) => res.json())
+        .then((data) => setAnalyticsData(data))
+        .catch((err) => console.error("Failed to load analytics:", err));
+    }
+  }, [adminTab]);
+
   const updateOrderStatus = async (orderId, newStatus) => {
     try {
       await fetch(`https://house-of-ar-backend.onrender.com/api/orders/${orderId}/status`, {
@@ -1161,7 +1174,6 @@ function AdminPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ status: newStatus })
       });
-      // Update the UI instantly
       setOrders(orders.map(o => o._id === orderId ? { ...o, status: newStatus } : o));
     } catch (error) {
       console.error("Failed to update status", error);
@@ -1225,24 +1237,24 @@ function AdminPage() {
       });
     }
   });
-  // ------------------------------
 
   if (loading) return <div style={legalContainerStyle}>Loading secure dashboard...</div>;
 
   return (
     <div className="page-transition" style={legalContainerStyle}>
-<h2 style={legalHeadingStyle}>Admin Dashboard</h2>
+      <h2 style={legalHeadingStyle}>Admin Dashboard</h2>
 
-      {/* Admin Navigation Tabs (Now with 4 Tabs) */}
+      {/* Admin Navigation Tabs */}
       <div style={{ display: "flex", gap: "10px", margin: "20px 0", flexWrap: "wrap" }}>
-        <button onClick={() => setActiveTab("analytics")} style={{ padding: "8px 16px", background: activeTab === "analytics" ? "var(--navy)" : "#eee", color: activeTab === "analytics" ? "#fff" : "#333", border: "none", cursor: "pointer", borderRadius: "4px", fontWeight: "bold" }}>Overview</button>
-        <button onClick={() => setActiveTab("inventory")} style={{ padding: "8px 16px", background: activeTab === "inventory" ? "var(--navy)" : "#eee", color: activeTab === "inventory" ? "#fff" : "#333", border: "none", cursor: "pointer", borderRadius: "4px", fontWeight: "bold" }}>Live Inventory</button>
-        <button onClick={() => setActiveTab("orders")} style={{ padding: "8px 16px", background: activeTab === "orders" ? "var(--navy)" : "#eee", color: activeTab === "orders" ? "#fff" : "#333", border: "none", cursor: "pointer", borderRadius: "4px", fontWeight: "bold" }}>Orders ({orders.length})</button>
-        <button onClick={() => setActiveTab("users")} style={{ padding: "8px 16px", background: activeTab === "users" ? "var(--navy)" : "#eee", color: activeTab === "users" ? "#fff" : "#333", border: "none", cursor: "pointer", borderRadius: "4px", fontWeight: "bold" }}>Customers ({totalUsers})</button>
+        <button onClick={() => setAdminTab("overview")} style={{ padding: "8px 16px", background: adminTab === "overview" ? "var(--navy)" : "#eee", color: adminTab === "overview" ? "#fff" : "#333", border: "none", cursor: "pointer", borderRadius: "4px", fontWeight: "bold" }}>Overview</button>
+        <button onClick={() => setAdminTab("inventory")} style={{ padding: "8px 16px", background: adminTab === "inventory" ? "var(--navy)" : "#eee", color: adminTab === "inventory" ? "#fff" : "#333", border: "none", cursor: "pointer", borderRadius: "4px", fontWeight: "bold" }}>Live Inventory</button>
+        <button onClick={() => setAdminTab("orders")} style={{ padding: "8px 16px", background: adminTab === "orders" ? "var(--navy)" : "#eee", color: adminTab === "orders" ? "#fff" : "#333", border: "none", cursor: "pointer", borderRadius: "4px", fontWeight: "bold" }}>Orders ({orders.length})</button>
+        <button onClick={() => setAdminTab("users")} style={{ padding: "8px 16px", background: adminTab === "users" ? "var(--navy)" : "#eee", color: adminTab === "users" ? "#fff" : "#333", border: "none", cursor: "pointer", borderRadius: "4px", fontWeight: "bold" }}>Customers ({totalUsers})</button>
+        <button onClick={() => setAdminTab("insights")} style={{ padding: "8px 16px", background: adminTab === "insights" ? "var(--navy)" : "#eee", color: adminTab === "insights" ? "#fff" : "#333", border: "none", cursor: "pointer", borderRadius: "4px", fontWeight: "bold" }}>Customer Insights</button>
       </div>
 
-      {/* 1. WRAPPER FOR ANALYTICS */}
-      <div style={{ display: activeTab === "analytics" ? "block" : "none" }}>
+      {/* 1. OVERVIEW TAB */}
+      <div style={{ display: adminTab === "overview" ? "block" : "none" }}>
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: "20px", marginBottom: "40px" }}>
           <div style={{ padding: "20px", background: "#fff", border: "1px solid #eee6d8", borderRadius: "8px", borderLeft: "4px solid var(--navy)", boxShadow: "0 2px 8px rgba(0,0,0,0.02)" }}>
             <div style={{ fontSize: "12px", color: "var(--muted)", textTransform: "uppercase", letterSpacing: "1px", marginBottom: "8px" }}>Total Revenue</div>
@@ -1260,8 +1272,8 @@ function AdminPage() {
         </div>
       </div>
 
-      {/* 2. WRAPPER FOR INVENTORY */}
-      <div style={{ display: activeTab === "inventory" ? "block" : "none" }}>
+      {/* 2. INVENTORY TAB */}
+      <div style={{ display: adminTab === "inventory" ? "block" : "none" }}>
         <div style={{ display: "flex", flexDirection: "column", gap: "15px", marginBottom: "50px" }}>
           {adminProducts.map(product => (
             <div key={product.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", border: "1px solid #eee6d8", padding: "15px", background: "#fbf9f5" }}>
@@ -1283,40 +1295,10 @@ function AdminPage() {
         </div>
       </div>
 
-      <div className="admin-tabs" style={{ display: "flex", gap: "10px", marginBottom: "20px" }}>
-  <button onClick={() => setAdminTab("overview")} className={adminTab === "overview" ? "active-tab" : ""}>Overview</button>
-  <button onClick={() => setAdminTab("inventory")} className={adminTab === "inventory" ? "active-tab" : ""}>Live Inventory</button>
-  <button onClick={() => setAdminTab("orders")} className={adminTab === "orders" ? "active-tab" : ""}>Orders</button>
-  <button onClick={() => setAdminTab("insights")} className={adminTab === "insights" ? "active-tab" : ""}>Customer Insights</button>
-</div>
-
-{adminTab === "insights" && (
-  <div className="admin-insights-section" style={{ background: "#fff", padding: "24px", borderRadius: "8px", boxShadow: "0 4px 12px rgba(0,0,0,0.05)" }}>
-    <h3>Live Visitor & Cart Activity</h3>
-    <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: "20px", margin: "20px 0" }}>
-      <div style={{ background: "#fbf9f5", padding: "20px", borderRadius: "6px" }}>
-        <h4>Total Site Visits</h4>
-        <p style={{ fontSize: "28px", fontWeight: "bold", color: "#102943" }}>{analyticsData.totalVisits || 0}</p>
-      </div>
-      <div style={{ background: "#fbf9f5", padding: "20px", borderRadius: "6px" }}>
-        <h4>Most Added to Cart</h4>
-        <ul>
-          {analyticsData.cartAdds?.map((item, idx) => (
-            <li key={idx}><strong>{item._id}</strong>: {item.count} times added</li>
-          ))}
-        </ul>
-      </div>
-    </div>
-  </div>
-)}
-
-{/* 3. WRAPPER FOR ORDERS */}
-      <div style={{ display: activeTab === "orders" ? "block" : "none" }}>
-        
-        {/* FILTER PILLS NAV */}
+      {/* 3. ORDERS TAB */}
+      <div style={{ display: adminTab === "orders" ? "block" : "none" }}>
         <div style={{ display: "flex", gap: "10px", marginBottom: "25px", flexWrap: "wrap", borderBottom: "1px solid #eee6d8", paddingBottom: "15px" }}>
           {["All", "Order Received", "Getting Packed", "Out for Delivery", "Delivered"].map(status => {
-            // Count how many orders match this status
             const count = status === "All" 
               ? orders.length 
               : orders.filter(o => (o.status || "Order Received") === status).length;
@@ -1338,7 +1320,6 @@ function AdminPage() {
           })}
         </div>
 
-        {/* ORDERS LIST */}
         {orders.length === 0 ? (
           <p style={legalTextStyle}>No orders found yet.</p>
         ) : (
@@ -1347,8 +1328,6 @@ function AdminPage() {
               .filter(order => orderFilter === "All" || (order.status || "Order Received") === orderFilter)
               .map(order => (
               <div key={order._id} style={{ border: "1px solid #eee6d8", padding: "25px", background: "#fbf9f5", borderRadius: "8px" }}>
-                
-                {/* ORDER HEADER WITH VISUAL BADGE */}
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", borderBottom: "1px solid #eee6d8", paddingBottom: "15px", marginBottom: "15px" }}>
                   <div>
                     <strong style={{ display: "block", color: "var(--navy)", fontSize: "16px" }}>Order ID: {order.orderId}</strong>
@@ -1409,8 +1388,8 @@ function AdminPage() {
         )}
       </div>
 
-      {/* WRAPPER FOR USERS - ONLY SHOWS WHEN ACTIVE TAB IS 'USERS' */}
-      <div style={{ display: activeTab === "users" ? "block" : "none" }}>
+      {/* 4. CUSTOMERS TAB */}
+      <div style={{ display: adminTab === "users" ? "block" : "none" }}>
         <div style={{ background: "#fff", padding: "20px", borderRadius: "8px", border: "1px solid #eee" }}>
           <h3 style={{ marginTop: 0 }}>Customer Directory</h3>
           <table style={{ width: "100%", borderCollapse: "collapse", marginTop: "15px", textAlign: "left" }}>
@@ -1435,7 +1414,33 @@ function AdminPage() {
           </table>
         </div>
       </div>
+
+      {/* 5. CUSTOMER INSIGHTS TAB */}
+      <div style={{ display: adminTab === "insights" ? "block" : "none" }}>
+        <div className="admin-insights-section" style={{ background: "#fff", padding: "24px", borderRadius: "8px", boxShadow: "0 4px 12px rgba(0,0,0,0.05)" }}>
+          <h3>Live Visitor & Cart Activity</h3>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: "20px", margin: "20px 0" }}>
+            <div style={{ background: "#fbf9f5", padding: "20px", borderRadius: "6px" }}>
+              <h4>Total Site Visits</h4>
+              <p style={{ fontSize: "28px", fontWeight: "bold", color: "#102943" }}>{analyticsData.totalVisits || 0}</p>
+            </div>
+            <div style={{ background: "#fbf9f5", padding: "20px", borderRadius: "6px" }}>
+              <h4>Most Added to Cart</h4>
+              <ul>
+                {analyticsData.cartAdds && analyticsData.cartAdds.length > 0 ? (
+                  analyticsData.cartAdds.map((item, idx) => (
+                    <li key={idx}><strong>{item._id}</strong>: {item.count} times added</li>
+                  ))
+                ) : (
+                  <p style={{ color: "#666", fontSize: "14px", marginTop: "8px" }}>No cart activity recorded yet.</p>
+                )}
+              </ul>
+            </div>
+          </div>
+        </div>
       </div>
+
+    </div>
   );
 }
 
