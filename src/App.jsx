@@ -1474,7 +1474,11 @@ function MyOrders() {
 ========================================================= */
 function ProductCard({ product, toggleWishlist, wishlist, addToCart, openProduct, cartItems, updateCartQuantity }) {
   const [imgLoaded, setImgLoaded] = useState(false);
-  const cartItem = cartItems ? cartItems.find((item) => item.id === product.id) : null;
+
+  // Safely find item handling both string and number ID types from MongoDB
+  const cartItem = cartItems && cartItems.length > 0 
+    ? cartItems.find((item) => String(item.id) === String(product.id)) 
+    : null;
 
   return (
     <article className="product-card" onClick={() => openProduct(product)}>
@@ -1506,7 +1510,6 @@ function ProductCard({ product, toggleWishlist, wishlist, addToCart, openProduct
           <span className="sale-price">₹{product.price || 399}</span>
         </div>
 
-        {/* PERMANENT INTERACTIVE CONTROLS ON THE CARD */}
         <div style={{ marginTop: "12px" }} onClick={(e) => e.stopPropagation()}>
           {product.outOfStock ? (
             <button className="checkout-button" disabled style={{ width: "100%", padding: "10px", background: "#ccc", cursor: "not-allowed" }}>
@@ -1514,12 +1517,28 @@ function ProductCard({ product, toggleWishlist, wishlist, addToCart, openProduct
             </button>
           ) : cartItem ? (
             <div style={{ background: "#102943", color: "#fff", padding: "10px 15px", borderRadius: "4px", display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%" }}>
-              <button onClick={() => updateCartQuantity(product.id, -1)} style={{ background: "none", border: "none", color: "#fff", fontSize: "18px", cursor: "pointer", padding: "0 10px" }}>−</button>
-              <span style={{ fontWeight: "bold", fontSize: "13px", letterSpacing: "1px" }}>{cartItem.quantity} IN CART</span>
-              <button onClick={() => updateCartQuantity(product.id, 1)} style={{ background: "none", border: "none", color: "#fff", fontSize: "18px", cursor: "pointer", padding: "0 10px" }}>+</button>
+              <button 
+                onClick={() => updateCartQuantity(product.id, -1)} 
+                style={{ background: "none", border: "none", color: "#fff", fontSize: "18px", cursor: "pointer", padding: "0 10px" }}
+              >
+                −
+              </button>
+              <span style={{ fontWeight: "bold", fontSize: "13px", letterSpacing: "1px" }}>
+                {cartItem.quantity} IN CART
+              </span>
+              <button 
+                onClick={() => updateCartQuantity(product.id, 1)} 
+                style={{ background: "none", border: "none", color: "#fff", fontSize: "18px", cursor: "pointer", padding: "0 10px" }}
+              >
+                +
+              </button>
             </div>
           ) : (
-            <button className="checkout-button" onClick={() => addToCart(product)} style={{ width: "100%", padding: "12px", background: "var(--navy)", color: "#fff", border: "none", borderRadius: "4px", fontWeight: "bold", cursor: "pointer", letterSpacing: "1px" }}>
+            <button 
+              className="checkout-button" 
+              onClick={() => addToCart(product)} 
+              style={{ width: "100%", padding: "12px", background: "var(--navy)", color: "#fff", border: "none", borderRadius: "4px", fontWeight: "bold", cursor: "pointer", letterSpacing: "1px" }}
+            >
               ADD TO CART +
             </button>
           )}
