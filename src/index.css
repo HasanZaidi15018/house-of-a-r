@@ -2322,3 +2322,49 @@ width: 100%;
   0% { background-position: 200% 0; }
   100% { background-position: -200% 0; }
 }
+
+/* Animated Cart Controls */
+.cart-action-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  background: var(--navy, #102943);
+  color: #fff;
+  padding: 10px 16px;
+  border-radius: 4px;
+  animation: fadeInScale 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  box-shadow: 0 4px 12px rgba(16, 41, 67, 0.15);
+}
+
+.cart-action-btn {
+  background: none;
+  border: none;
+  color: #fff;
+  font-size: 18px;
+  font-weight: bold;
+  cursor: pointer;
+  padding: 0 8px;
+  transition: transform 0.1s ease;
+}
+
+.cart-action-btn:active {
+  transform: scale(0.85);
+}
+
+.cart-action-count {
+  font-weight: 600;
+  font-size: 13px;
+  letter-spacing: 1px;
+}
+
+@keyframes fadeInScale {
+  0% {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}

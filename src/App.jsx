@@ -1483,7 +1483,7 @@ function MyOrders() {
 function ProductCard({ product, toggleWishlist, wishlist, addToCart, openProduct, cartItems, updateCartQuantity }) {
   const [imgLoaded, setImgLoaded] = useState(false);
 
-  // Safely check if product is already in the cart
+  // Safely find if product is in the cart
   const cartItem = cartItems && cartItems.length > 0 
     ? cartItems.find((item) => String(item.id) === String(product.id)) 
     : null;
@@ -1518,26 +1518,28 @@ function ProductCard({ product, toggleWishlist, wishlist, addToCart, openProduct
           <span className="sale-price">₹{product.price || 399}</span>
         </div>
 
-        {/* INTERACTIVE CARD CONTROLS MATCHING CART DRAWER */}
-        <div style={{ marginTop: "12px" }} onClick={(e) => e.stopPropagation()}>
+        {/* ANIMATED INTERACTIVE CART BUTTON & COUNTER */}
+        <div style={{ marginTop: "12px", minHeight: "44px" }} onClick={(e) => e.stopPropagation()}>
           {product.outOfStock ? (
-            <button className="checkout-button" disabled style={{ width: "100%", padding: "10px", background: "#e5e5e5", color: "#888", cursor: "not-allowed", border: "none" }}>
+            <button className="checkout-button" disabled style={{ width: "100%", padding: "12px", background: "#e5e5e5", color: "#888", cursor: "not-allowed", border: "none" }}>
               OUT OF STOCK
             </button>
           ) : cartItem ? (
-            <div style={{ border: "1px solid #102943", padding: "8px 12px", borderRadius: "4px", display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%", background: "#fff" }}>
+            <div className="cart-action-container">
               <button 
-                onClick={() => updateCartQuantity(product.id, -1)} 
-                style={{ background: "none", border: "none", color: "#102943", fontSize: "16px", cursor: "pointer", fontWeight: "bold", padding: "0 8px" }}
+                className="cart-action-btn"
+                onClick={() => updateCartQuantity(product.id, -1)}
+                aria-label="Decrease quantity"
               >
                 −
               </button>
-              <span style={{ fontWeight: "600", fontSize: "13px", color: "#102943" }}>
-                {cartItem.quantity}
+              <span className="cart-action-count">
+                {cartItem.quantity} IN CART
               </span>
               <button 
-                onClick={() => updateCartQuantity(product.id, 1)} 
-                style={{ background: "none", border: "none", color: "#102943", fontSize: "16px", cursor: "pointer", fontWeight: "bold", padding: "0 8px" }}
+                className="cart-action-btn"
+                onClick={() => updateCartQuantity(product.id, 1)}
+                aria-label="Increase quantity"
               >
                 +
               </button>
@@ -1546,7 +1548,7 @@ function ProductCard({ product, toggleWishlist, wishlist, addToCart, openProduct
             <button 
               className="checkout-button" 
               onClick={() => addToCart(product)} 
-              style={{ width: "100%", padding: "12px", background: "var(--navy)", color: "#fff", border: "none", borderRadius: "4px", fontWeight: "bold", cursor: "pointer", letterSpacing: "1px" }}
+              style={{ width: "100%", padding: "12px", background: "var(--navy)", color: "#fff", border: "none", borderRadius: "4px", fontWeight: "bold", cursor: "pointer", letterSpacing: "1px", transition: "transform 0.2s ease" }}
             >
               ADD TO CART +
             </button>
