@@ -554,21 +554,21 @@ const pageProps = {
             autoFocus={isSearchOpen}
           />
         </div>
-        <div className="search-results-grid">
-          {searchQuery && products
-            .filter(p => p.name.toLowerCase().includes(searchQuery.toLowerCase()) || p.subtitle.toLowerCase().includes(searchQuery.toLowerCase()))
-            .map(p => (
-              <button 
-                className="search-result-card page-transition" 
-                key={p.id} 
-                onClick={() => { openProduct(p); setIsSearchOpen(false); setSearchQuery(""); }}
-              >
-                <img src={p.image} alt={p.name} />
-                <h4>{p.name}</h4>
-                <p>{p.subtitle}</p>
-              </button>
-          ))}
-        </div>
+<div className="search-results-grid">
+  {searchQuery && products
+    .filter(p => p.name.toLowerCase().includes(searchQuery.toLowerCase()) || p.subtitle.toLowerCase().includes(searchQuery.toLowerCase()))
+    .map(p => (
+      <button 
+        className="search-result-card page-transition" 
+        key={p.id} 
+        onClick={() => { openProduct(p); setIsSearchOpen(false); setSearchQuery(""); }}
+      >
+        <img src={p.image} alt={p.name} style={{ width: "100%", height: "180px", objectFit: "cover", borderRadius: "4px" }} />
+        <h4>{p.name}</h4>
+        <p>{p.subtitle}</p>
+      </button>
+  ))}
+</div>
       </div>
 
       {/* MODALS & DRAWERS */}
