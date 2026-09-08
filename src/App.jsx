@@ -220,9 +220,12 @@ const syncCartToCloud = (updatedCart) => {
     e.preventDefault();
 
     // LOGIN GATE
-    const loggedInUser = localStorage.getItem("email");
+const handlePaymentProceed = async (e) => {
+    e.preventDefault();
+
+    // LOGIN GATE FIX: Check your state or the "user" localStorage object properly
     if (!loggedInUser) {
-      setShowLoginPrompt(true); // Opens the sleek popup instead of the ugly browser alert
+      setShowLoginPrompt(true); 
       return; 
     }
 
