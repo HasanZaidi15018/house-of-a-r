@@ -34,6 +34,14 @@ function App() {
       .catch(err => console.error("Error loading products:", err));
   }, []);
   
+  useEffect(() => {
+  fetch("https://house-of-ar-backend.onrender.com/api/analytics", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ eventType: "VISIT" })
+  }).catch(err => console.error("Visit tracking error:", err));
+}, []);
+
   // SEARCH STATE
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
@@ -166,6 +174,17 @@ const syncCartToCloud = (updatedCart) => {
       syncCartToCloud(newCart);
       return newCart;
     });
+
+    // TRACK ADD TO CART EVENT TO BACKEND
+    fetch("https://house-of-ar-backend.onrender.com/api/analytics", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        eventType: "ADD_TO_CART",
+        productId: product.id || product._id,
+        productName: product.name
+      })
+    }).catch(err => console.error("Cart tracking error:", err));
     
     // Close the product window
     setSelectedProduct(null);
@@ -1263,6 +1282,33 @@ function AdminPage() {
           ))}
         </div>
       </div>
+
+      <div className="admin-tabs" style={{ display: "flex", gap: "10px", marginBottom: "20px" }}>
+  <button onClick={() => setAdminTab("overview")} className={adminTab === "overview" ? "active-tab" : ""}>Overview</button>
+  <button onClick={() => setAdminTab("inventory")} className={adminTab === "inventory" ? "active-tab" : ""}>Live Inventory</button>
+  <button onClick={() => setAdminTab("orders")} className={adminTab === "orders" ? "active-tab" : ""}>Orders</button>
+  <button onClick={() => setAdminTab("insights")} className={adminTab === "insights" ? "active-tab" : ""}>Customer Insights</button>
+</div>
+
+{adminTab === "insights" && (
+  <div className="admin-insights-section" style={{ background: "#fff", padding: "24px", borderRadius: "8px", boxShadow: "0 4px 12px rgba(0,0,0,0.05)" }}>
+    <h3>Live Visitor & Cart Activity</h3>
+    <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: "20px", margin: "20px 0" }}>
+      <div style={{ background: "#fbf9f5", padding: "20px", borderRadius: "6px" }}>
+        <h4>Total Site Visits</h4>
+        <p style={{ fontSize: "28px", fontWeight: "bold", color: "#102943" }}>{analyticsData.totalVisits || 0}</p>
+      </div>
+      <div style={{ background: "#fbf9f5", padding: "20px", borderRadius: "6px" }}>
+        <h4>Most Added to Cart</h4>
+        <ul>
+          {analyticsData.cartAdds?.map((item, idx) => (
+            <li key={idx}><strong>{item._id}</strong>: {item.count} times added</li>
+          ))}
+        </ul>
+      </div>
+    </div>
+  </div>
+)}
 
 {/* 3. WRAPPER FOR ORDERS */}
       <div style={{ display: activeTab === "orders" ? "block" : "none" }}>
