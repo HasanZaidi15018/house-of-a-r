@@ -1107,7 +1107,7 @@ function AdminPage() {
   const [orders, setOrders] = useState([]);
   const [adminProducts, setAdminProducts] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState("analytics");
+  const [adminTab, setAdminTab] = useState("overview");
   const [orderFilter, setOrderFilter] = useState("All");
   const [registeredUsers, setRegisteredUsers] = useState([]);
   const [totalUsers, setTotalUsers] = useState(0);
