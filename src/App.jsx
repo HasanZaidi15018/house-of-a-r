@@ -34,13 +34,18 @@ function App() {
       .catch(err => console.error("Error loading products:", err));
   }, []);
   
+// TRACK SITE VISIT ON APP LOAD (EXCLUDING ADMIN)
   useEffect(() => {
-  fetch("https://house-of-ar-backend.onrender.com/api/analytics", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ eventType: "VISIT" })
-  }).catch(err => console.error("Visit tracking error:", err));
-}, []);
+    const savedUser = localStorage.getItem("user");
+    const loggedInUser = savedUser ? JSON.parse(savedUser) : null;
+    const email = loggedInUser ? loggedInUser.email : "";
+
+    fetch("https://house-of-ar-backend.onrender.com/api/analytics", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ eventType: "VISIT", email })
+    }).catch(err => console.error("Visit tracking error:", err));
+  }, []);
 
   // SEARCH STATE
   const [isSearchOpen, setIsSearchOpen] = useState(false);
@@ -164,25 +169,30 @@ const syncCartToCloud = (updatedCart) => {
     }
   };
 
-  const addToCart = (product) => {
+const addToCart = (product) => {
     setCartItems((prevItems) => {
       const existingItem = prevItems.find((item) => item.id === product.id);
-      const newCart = existingItem 
+      const newCart = existingItem
         ? prevItems.map((item) => item.id === product.id ? { ...item, quantity: item.quantity + 1 } : item)
         : [...prevItems, { ...product, quantity: 1 }];
-      
+
       syncCartToCloud(newCart);
       return newCart;
     });
 
-    // TRACK ADD TO CART EVENT TO BACKEND
+// TRACK ADD TO CART (EXCLUDING ADMIN)
+    const savedUser = localStorage.getItem("user");
+    const loggedInUser = savedUser ? JSON.parse(savedUser) : null;
+    const email = loggedInUser ? loggedInUser.email : "";
+
     fetch("https://house-of-ar-backend.onrender.com/api/analytics", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         eventType: "ADD_TO_CART",
         productId: product.id || product._id,
-        productName: product.name
+        productName: product.name,
+        email
       })
     }).catch(err => console.error("Cart tracking error:", err));
     
