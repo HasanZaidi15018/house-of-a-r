@@ -305,8 +305,8 @@ const handlePaymentProceed = async (e) => {
   const openProduct = (product) => setSelectedProduct(product);
   const closeProduct = () => setSelectedProduct(null);
 
-  const pageProps = {
-    products, wishlist, toggleWishlist, addToCart, openProduct
+const pageProps = {
+    products, wishlist, toggleWishlist, addToCart, openProduct, cartItems, updateCartQuantity
   };
 
   return (
@@ -1472,8 +1472,11 @@ function MyOrders() {
 /* =========================================================
    REUSABLE UTILITY COMPONENTS
 ========================================================= */
-function ProductCard({ product, toggleWishlist, wishlist, addToCart, openProduct }) {
+function ProductCard({ product, toggleWishlist, wishlist, addToCart, openProduct, cartItems, updateCartQuantity }) {
   const [imgLoaded, setImgLoaded] = useState(false);
+
+  // Check if this specific product is already in the cart
+  const cartItem = cartItems.find((item) => item.id === product.id);
 
   return (
     <article className="product-card" onClick={() => openProduct(product)}>
@@ -1495,13 +1498,22 @@ function ProductCard({ product, toggleWishlist, wishlist, addToCart, openProduct
         >
           <HeartIcon filled={wishlist.includes(product.id)} />
         </button>
-        <div className="product-hover">
+
+        <div className="product-hover" onClick={(e) => e.stopPropagation()}>
           {product.outOfStock ? (
-            <button className="quick-add out-of-stock-btn" disabled onClick={(e) => e.stopPropagation()}>
+            <button className="quick-add out-of-stock-btn" disabled>
               OUT OF STOCK
             </button>
+          ) : cartItem ? (
+            // IF ALREADY IN CART: SHOW QUANTITY SELECTOR (+ / -)
+            <div className="quantity-selector" style={{ background: "#102943", color: "#fff", padding: "8px 15px", borderRadius: "4px", display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%" }}>
+              <button onClick={() => updateCartQuantity(product.id, -1)} style={{ background: "none", border: "none", color: "#fff", fontSize: "16px", cursor: "pointer" }}>−</button>
+              <span style={{ fontWeight: "bold" }}>{cartItem.quantity} in cart</span>
+              <button onClick={() => updateCartQuantity(product.id, 1)} style={{ background: "none", border: "none", color: "#fff", fontSize: "16px", cursor: "pointer" }}>+</button>
+            </div>
           ) : (
-            <button className="quick-add" onClick={(event) => { event.stopPropagation(); addToCart(product); }}>
+            // IF NOT IN CART: SHOW ADD TO CART BUTTON
+            <button className="quick-add" onClick={() => addToCart(product)}>
               ADD TO CART <span>+</span>
             </button>
           )}
