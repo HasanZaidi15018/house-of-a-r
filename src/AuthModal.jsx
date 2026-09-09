@@ -90,9 +90,10 @@ export default function AuthModal({ isOpen, onClose, setLoggedInUser, setWishlis
     }
   };
 
-  return (
-    <div style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, backgroundColor: "rgba(0,0,0,0.7)", display: "flex", justifyContent: "center", alignItems: "center", zIndex: 1000 }}>
-      <div style={{ backgroundColor: "#1a1a1a", padding: "30px", borderRadius: "8px", width: "90%", maxWidth: "400px", color: "#fff", position: "relative" }}>
+return (
+  <div style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, backgroundColor: "rgba(0,0,0,0.7)", display: "flex", justifyContent: "center", alignItems: "flex-start", paddingTop: "80px", zIndex: 1000 }}>
+    <div style={{ backgroundColor: "#1a1a1a", padding: "30px", borderRadius: "8px", width: "90%", maxWidth: "400px", color: "#fff", position: "relative" }}>
+  
         <button onClick={onClose} style={{ position: "absolute", top: "10px", right: "15px", background: "none", border: "none", color: "#fff", fontSize: "20px", cursor: "pointer" }}>✕</button>
         
         {error && <p style={{ color: "#ff4444", textAlign: "center", fontSize: "14px", marginBottom: "15px" }}>{error}</p>}

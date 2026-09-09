@@ -285,7 +285,7 @@ notes: {
           address: checkoutData.address,
           pincode: checkoutData.pincode
         },
-        
+
         handler: async function (response) {
           try {
             await fetch("https://house-of-ar-backend.onrender.com/confirm-order", {
@@ -394,12 +394,23 @@ const pageProps = {
                   </button>
                 </div>
               ) : (
-                <button 
-                  onClick={() => setIsAuthOpen(true)}
-                  style={{ background: "none", border: "none", color: "inherit", cursor: "pointer", fontSize: "13px", fontWeight: "500", letterSpacing: "1px", fontFamily: "inherit" }}
-                >
-                  LOGIN
-                </button>
+<button 
+  onClick={() => setIsAuthOpen(true)}
+  style={{ 
+    background: "var(--navy)", 
+    color: "#fff", 
+    border: "none", 
+    padding: "8px 16px", 
+    borderRadius: "4px", 
+    cursor: "pointer", 
+    fontSize: "12px", 
+    fontWeight: "600", 
+    letterSpacing: "1px", 
+    fontFamily: "inherit" 
+  }}
+>
+  LOGIN
+</button>
               )}
             </div>
 
